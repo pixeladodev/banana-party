@@ -2,8 +2,8 @@
 # Player binary and launch scripts for the package.
 # When ../bananads-lan/dist/bananads is present, that local draft is what ships.
 # Otherwise download the published release named in app/manifest and check binary_sha.
-# emu/bananads and emu/lobby.nds stay gitignored. The room ROM is copied only when
-# this machine already has it (the draft dist, or app/emu/lobby.nds).
+# emu/bananads and emu/lobby.nds stay gitignored. The room ROM is copied when this machine
+# already has the pinned one (lobby_rom_sha), otherwise build/build-lobby-rom.sh builds it.
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 APP=$1
@@ -29,6 +29,7 @@ copy_scripts() {
 }
 
 copy_rom() {
+    want_rom=$(sed -n 's/^lobby_rom_sha=//p' "$ROOT/app/manifest" | head -n 1 | tr -d '\r')
     rom=${BANANA_PARTY_LOBBY_NDS:-}
     if [ ! -s "$rom" ]; then
         if [ -s "$LAN/dist/lobby.nds" ]; then
@@ -39,9 +40,12 @@ copy_rom() {
             rom=
         fi
     fi
-    if [ -n "$rom" ]; then
+    if [ -n "$rom" ] && [ "$(sha_file "$rom")" = "$want_rom" ]; then
         cp "$rom" "$APP/emu/lobby.nds"
         chmod 644 "$APP/emu/lobby.nds"
+    else
+        [ -z "$rom" ] || echo "fetch-emulator: $rom is not the pinned room ROM, building it" >&2
+        sh "$ROOT/build/build-lobby-rom.sh" "$APP/emu/lobby.nds"
     fi
 }
 

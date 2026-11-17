@@ -5,10 +5,11 @@ set -euo pipefail
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
 
-if ! command -v curl >/dev/null 2>&1 || ! command -v python3 >/dev/null 2>&1; then
+if ! command -v curl >/dev/null 2>&1 || ! command -v python3 >/dev/null 2>&1 || ! command -v ld.lld >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y --no-install-recommends ca-certificates curl xz-utils tar python3 dpkg-dev unzip
+    # clang, lld and llvm build the room ROM (build/build-lobby-rom.sh)
+    apt-get install -y --no-install-recommends ca-certificates curl xz-utils tar python3 dpkg-dev unzip clang lld llvm
 fi
 
 BOOTLIN_NAME=aarch64--glibc--stable-2025.08-1

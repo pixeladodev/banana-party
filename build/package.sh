@@ -43,10 +43,7 @@ cp "$ROOT/app/common.sh" "$ROOT/app/tile.sh" "$ROOT/app/room.sh" "$ROOT/app/unin
     echo "package: emu/bananads, run-emu, lan.sh and status.sh are required" >&2
     exit 1
 }
-LAN=${BANANA_PARTY_LAN:-$ROOT/../bananads-lan}
-if [ -s "${BANANA_PARTY_LOBBY_NDS:-}" ] || [ -s "$LAN/dist/lobby.nds" ] || [ -s "$ROOT/app/emu/lobby.nds" ]; then
-    [ -s "$APP/emu/lobby.nds" ] || { echo "package: emu/lobby.nds is on this machine and did not make the zip" >&2; exit 1; }
-fi
+[ -s "$APP/emu/lobby.nds" ] || { echo "package: emu/lobby.nds (the room ROM) is required" >&2; exit 1; }
 cp "$ROOT/tiles/Banana Party.sh" "$STAGE/Banana Party.sh"
 cp "$ROOT/packaging/store/tile.png" "$APP/tile.png"
 cp "$ROOT/INSTALL.txt" "$STAGE/INSTALL.txt"
