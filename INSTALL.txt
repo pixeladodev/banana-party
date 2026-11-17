@@ -1,0 +1,43 @@
+Banana Party
+============
+
+Install (recommended)
+---------------------
+
+**Option A — one file**
+
+1. Copy **Install-Banana-Party.sh** from the release into **store/tiles** on the shared **banana** folder.
+   Do not replace the whole **store** folder.
+2. Reboot once, open **Apps**, and run the installer tile. It adds the app and opens it.
+
+**Option B — zip**
+
+Copy the folder **banana-party** into **store/apps** and **Banana Party.sh** into **store/tiles**.
+Do not replace the whole **store** folder. Reboot once, then open **Apps**.
+Leave **Apps** and open **Apps** again so the list refreshes (temporary BananaOS limitation).
+
+Where it goes
+-------------
+
+    store/
+      apps/
+        banana-party/
+      tiles/
+        Banana Party.sh
+      (other apps stay here)
+
+English
+-------
+
+1. On the console: Settings > Network > File sharing > On.
+2. On the computer, open the share named **banana**. Copy into **store** only.
+3. Use Option A or Option B above.
+4. Reboot once. Open **Apps**.
+
+Español
+-------
+
+1. En la consola: Settings > Network > File sharing > On.
+2. En el ordenador, abre el recurso **banana**. Copia solo dentro de **store**.
+3. Usa la opción A o la B.
+4. Reinicia una vez. Abre **Apps**.
