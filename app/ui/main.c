@@ -1107,6 +1107,17 @@ static int handle(Model *m, int act, int arg)
         if (act == ACT_OK || act == ACT_BACK) m->view = V_GAMES;
         return 0;
     }
+    if (m->view == V_FW_RESET) {
+        /* the bundled BananaDS's working copy of the firmware goes: the next DS menu starts from /bios again */
+        if (act == ACT_OK && unlink(FW_COPY) != 0 && errno != ENOENT)
+            snprintf(m->err, sizeof m->err, "%s", strerror(errno));
+        if (act == ACT_OK || act == ACT_BACK) m->view = V_FW_CONFIRM;
+        return 0;
+    }
+    if (m->view == V_FW_CONFIRM && act == ACT_LOBBY) {
+        if (view_firmware_copy()) m->view = V_FW_RESET;
+        return 0;
+    }
     if (m->view == V_FW_CONFIRM || m->view == V_FW_MISSING) {
         if (act == ACT_OK && m->view == V_FW_CONFIRM && view_firmware_ok()) {
             /* the DS menu on the bundled BananaDS (tile.sh: room.sh play @firmware) */

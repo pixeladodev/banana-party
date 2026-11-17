@@ -11,7 +11,7 @@
 
 /* V_GAMES, the library, is where the app opens; V_MAIN is its settings (START) */
 enum { V_MAIN, V_UNINSTALL, V_ABOUT, V_UPDATE, V_UPDATED, V_GAMES, V_LOBBY, V_LOBBY_EXIT, V_LOBBY_DISCONNECT,
-       V_FW_CONFIRM, V_FW_MISSING, V_BIOS_NOTICE };
+       V_FW_CONFIRM, V_FW_MISSING, V_BIOS_NOTICE, V_FW_RESET };
 enum { ROW_DISCOVER, ROW_DLPLAY, ROW_UPDATES, ROW_ABOUT, ROW_COUNT };
 /* the settings' rows, one under the other */
 #define ROW_PITCH 60
@@ -20,6 +20,9 @@ enum { ROW_DISCOVER, ROW_DLPLAY, ROW_UPDATES, ROW_ABOUT, ROW_COUNT };
 int view_firmware_ok(void);
 /* the files missing from BIOS_DIR, comma-separated, into buf; returns how many (0: all there) */
 int view_firmware_missing(char *buf, int n);
+/* the bundled BananaDS's working copy of the user's firmware, with the DS menu's settings (firmware.user_copy) */
+#define FW_COPY "/data/bananads/firmware/firmware.bin"
+int view_firmware_copy(void);
 enum { SORT_AZ, SORT_FAV, SORT_RECENT, SORT_COUNT };
 /* the library as a list: rows on the bottom panel at once */
 #define GAME_ROWS 6

@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 Hit g_hits[MAX_HITS];
 int g_nhits;
@@ -80,6 +82,11 @@ const PxTr view_tr[] = {
     { "To join a game with DS Download Play, copy your own DS files to the bios folder at the root of the card (/bios, next to banana, bananads and roms): bios7.bin (16 KB), bios9.bin (4 KB) and firmware.bin (256 KB). If they're already on the SD card, copy them there with the BananaOS file explorer. Everything else works without them.",
       "Para unirte a una partida con Descarga DS, copia los archivos de tu propia DS en la carpeta bios de la raíz de la tarjeta (/bios, junto a banana, bananads y roms): bios7.bin (16 KB), bios9.bin (4 KB) y firmware.bin (256 KB). Si ya los tienes en la tarjeta SD, cópialos ahí con el explorador de archivos de BananaOS. Todo lo demás funciona sin ellos." },
     { "OK", "Aceptar" },
+    { "Reset settings", "Restablecer" },
+    { "Reset", "Restablecer" },
+    { "Reset the DS settings?", "¿Restablecer los ajustes de DS?" },
+    { "Your name, language and the other DS menu settings go back to those in your firmware.bin in /bios.",
+      "Tu nombre, idioma y los demás ajustes del menú de DS vuelven a los de tu firmware.bin de /bios." },
     { "Ready", "Lista" },
     { "Opens the DS menu with your BIOS and firmware. Choose DS Download Play there to join a game another console hosts with one card.",
       "Abre el menú de DS con tu BIOS y firmware. Elige Descarga DS ahí para unirte a una partida que otra consola aloja con una sola tarjeta." },
@@ -249,6 +256,11 @@ int view_firmware_ok(void)
     return bios_has(b9, 4096) && bios_has(b7, 16384) && bios_has(fw, 0);
 }
 
+int view_firmware_copy(void)
+{
+    return access(FW_COPY, F_OK) == 0 || getenv("PREVIEW_FW_COPY") != NULL;  /* (preview.c: as if there) */
+}
+
 int view_firmware_missing(char *buf, int n)
 {
     static const char *const b9[] = { "bios9.bin", "biosnds9.rom", "bios9.rom", "nds_bios_arm9.bin", NULL };
@@ -295,7 +307,7 @@ void view_top(PxCanvas *c, const Model *m)
     if (m->view != V_GAMES) px_cover_shine(NULL, 0, 0, 0, 0);
     if (m->view == V_LOBBY) { lobby_top(c, m); return; }
     if (m->view == V_LOBBY_EXIT || m->view == V_LOBBY_DISCONNECT || m->view == V_FW_CONFIRM || m->view == V_FW_MISSING ||
-        m->view == V_BIOS_NOTICE) {
+        m->view == V_BIOS_NOTICE || m->view == V_FW_RESET) {
         px_screen(c);
         px_status(c, "Banana Party", m->battery, m->charging, m->clock);
         return;
@@ -793,7 +805,24 @@ void view_bottom(PxCanvas *c, const Model *m)
                NULL);
         px_face(c, 18, 422, PX_LEFT, "B", T("Cancel"), 0, &r, PX_FACE_NEUTRAL);
         add_face_hit(r, HIT_BACK);
+        if (view_firmware_copy()) {  /* the DS menu's settings kept on this console: X puts the user's own back */
+            px_face(c, 18 + px_face_w(c, "B", T("Cancel")) + 8, 422, PX_LEFT, "X", T("Reset settings"), 0, &r,
+                    PX_FACE_NEUTRAL);
+            add_face_hit(r, HIT_LOBBY);
+        }
         px_face(c, 622, 422, PX_RIGHT, "A", T("Open"), 0, &r, PX_FACE_PRIMARY);
+        add_face_hit(r, HIT_OK);
+        return;
+    }
+    if (m->view == V_FW_RESET) {
+        g_nhits = 0;
+        px_screen(c);
+        dialog(c, T("Reset the DS settings?"),
+               T("Your name, language and the other DS menu settings go back to those in your firmware.bin in /bios."),
+               NULL);
+        px_face(c, 18, 422, PX_LEFT, "B", T("Cancel"), 0, &r, PX_FACE_NEUTRAL);
+        add_face_hit(r, HIT_BACK);
+        px_face(c, 622, 422, PX_RIGHT, "A", T("Reset"), 0, &r, PX_FACE_DANGER);
         add_face_hit(r, HIT_OK);
         return;
     }

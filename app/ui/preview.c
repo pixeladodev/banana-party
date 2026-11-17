@@ -538,6 +538,15 @@ int main(int argc, char **argv)
     m.view = V_FW_MISSING;
     ok &= shot(dir, "dlplay-missing", 640, 480, "dark", "yellow", "es", &m);
     ok &= shot(dir, "dlplay-missing", 1024, 768, "light", "yellow", "en", &m);
+    /* the DS settings kept on this console: X on the question resets them, after a question of its own */
+    setenv("PREVIEW_FW_COPY", "1", 1);
+    m.view = V_FW_CONFIRM;
+    ok &= shot(dir, "dlplay-confirm-kept", 640, 480, "dark", "yellow", "es", &m);
+    ok &= shot(dir, "dlplay-confirm-kept", 1024, 768, "light", "yellow", "en", &m);
+    m.view = V_FW_RESET;
+    ok &= shot(dir, "dlplay-reset", 640, 480, "dark", "yellow", "es", &m);
+    ok &= shot(dir, "dlplay-reset", 1024, 768, "light", "yellow", "en", &m);
+    unsetenv("PREVIEW_FW_COPY");
     /* the first launch without them: where they go, once */
     m.view = V_BIOS_NOTICE;
     ok &= shot(dir, "bios-notice", 640, 480, "dark", "yellow", "es", &m);
