@@ -480,6 +480,7 @@ static int key_action(int code, int value)
     case BTN_SOUTH: case KEY_BACKSPACE: case KEY_ESC: return ACT_BACK;
     case BTN_NORTH: return ACT_LOBBY;
     case BTN_START: return ACT_MENU;
+    case BTN_SELECT: return ACT_DLPLAY;
     default: return ACT_NONE;
     }
 }
@@ -1087,9 +1088,30 @@ static int write_line(const char *path, const char *s)
     return fclose(f) == 0;
 }
 
+/* DS Download Play: a question first (it opens the DS menu, where the player picks DS Download Play), or which
+   of the user's BIOS and firmware files are missing */
+static void dlplay_ask(Model *m, int from_games)
+{
+    if (upd_installing(&m->upd)) return;
+    m->err[0] = 0;
+    m->from_games = from_games;
+    m->view = view_firmware_ok() ? V_FW_CONFIRM : V_FW_MISSING;
+}
+
 /* one action; returns 1 to leave */
 static int handle(Model *m, int act, int arg)
 {
+    if (m->view == V_FW_CONFIRM || m->view == V_FW_MISSING) {
+        if (act == ACT_OK && m->view == V_FW_CONFIRM && view_firmware_ok()) {
+            /* the DS menu on the bundled BananaDS (tile.sh: room.sh play @firmware) */
+            if (write_line(PLAY_FILE, "@firmware")) {
+                g_exit = PLAY_EXIT;
+                return 1;
+            }
+        }
+        if (act == ACT_OK || act == ACT_BACK) m->view = m->from_games ? V_GAMES : V_MAIN;
+        return 0;
+    }
     if (m->view == V_LOBBY_EXIT) {
         if (act == ACT_OK) {
             g_stop = 1;
@@ -1142,6 +1164,7 @@ static int handle(Model *m, int act, int arg)
             }
             return !upd_installing(&m->upd);
         case ACT_MENU: m->err[0] = 0; m->view = V_MAIN; break;
+        case ACT_DLPLAY: dlplay_ask(m, 1); break;
         case ACT_SORT:
             if (m->ngames <= 0) break;
             m->sort = (m->sort + 1) % SORT_COUNT;
@@ -1271,13 +1294,7 @@ static int handle(Model *m, int act, int arg)
     case ACT_OK:
         if (m->cursor == ROW_ABOUT) { m->from_games = 0; m->view = V_ABOUT; break; }
         if (m->cursor == ROW_DISCOVER) { m->discover = !m->discover; save_ui_conf(m); break; }
-        if (m->cursor == ROW_DLPLAY) {
-            /* the DS menu on the bundled BananaDS (tile.sh: room.sh play @firmware) */
-            if (!view_firmware_ok() || upd_installing(&m->upd)) break;
-            if (!write_line(PLAY_FILE, "@firmware")) break;
-            g_exit = PLAY_EXIT;
-            return 1;
-        }
+        if (m->cursor == ROW_DLPLAY) { dlplay_ask(m, 0); break; }
         /* fall through */
     case ACT_LEFT:
     case ACT_RIGHT:
@@ -1457,6 +1474,7 @@ static int touch_action(int hx, int hy, int *arg)
         case HIT_LOBBY: act = ACT_LOBBY; break;
         case HIT_LOBBY_ROW: act = ACT_LOBBY_ROW; *arg = g_hits[h].arg; break;
         case HIT_LOBBY_DISCONNECT: act = ACT_LOBBY_DISCONNECT; break;
+        case HIT_DLPLAY: act = ACT_DLPLAY; break;
         default: break;
         }
     }

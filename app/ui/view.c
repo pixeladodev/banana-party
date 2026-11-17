@@ -68,6 +68,15 @@ const PxTr view_tr[] = {
     { "No DS games in roms/nds.", "No hay juegos de DS en roms/nds." },
     { "Auto discovery", "Descubrimiento automático" },
     { "DS Download Play", "Descarga DS" },
+    { "Download", "Descarga" },
+    { "Open the DS menu?", "¿Abrir el menú de DS?" },
+    { "This starts your console's DS firmware. In the DS menu, choose DS Download Play to join the game another console is hosting.",
+      "Se cargará el firmware de DS de tu consola. En el menú de DS, elige Descarga DS para unirte a la partida que aloja otra consola." },
+    { "BIOS files missing", "Faltan archivos de la BIOS" },
+    { "Missing: %s", "Faltan: %s" },
+    { "Copy your own DS BIOS and firmware to the bios folder of the SD card (/data/bios): bios7.bin, bios9.bin and firmware.bin.",
+      "Copia la BIOS y el firmware de tu propia DS en la carpeta bios de la tarjeta SD (/data/bios): bios7.bin, bios9.bin y firmware.bin." },
+    { "OK", "Aceptar" },
     { "Ready", "Lista" },
     { "Opens the DS menu with your BIOS and firmware. Choose DS Download Play there to join a game another console hosts with one card.",
       "Abre el menú de DS con tu BIOS y firmware. Elige Descarga DS ahí para unirte a una partida que otra consola aloja con una sola tarjeta." },
@@ -237,6 +246,19 @@ int view_firmware_ok(void)
     return bios_has(b9, 4096) && bios_has(b7, 16384) && bios_has(fw, 0);
 }
 
+int view_firmware_missing(char *buf, int n)
+{
+    static const char *const b9[] = { "bios9.bin", "biosnds9.rom", "bios9.rom", "nds_bios_arm9.bin", NULL };
+    static const char *const b7[] = { "bios7.bin", "biosnds7.rom", "bios7.rom", "nds_bios_arm7.bin", NULL };
+    static const char *const fw[] = { "firmware.bin", "nds_firmware.bin", "firmware.rom", "fw.bin", NULL };
+    int k = 0;
+    if (n > 0) buf[0] = 0;
+    if (!bios_has(b7, 16384)) { snprintf(buf + strlen(buf), (size_t)(n - (int)strlen(buf)), "%sbios7.bin", k++ ? ", " : ""); }
+    if (!bios_has(b9, 4096)) { snprintf(buf + strlen(buf), (size_t)(n - (int)strlen(buf)), "%sbios9.bin", k++ ? ", " : ""); }
+    if (!bios_has(fw, 0)) { snprintf(buf + strlen(buf), (size_t)(n - (int)strlen(buf)), "%sfirmware.bin", k++ ? ", " : ""); }
+    return k;
+}
+
 int view_row_enabled(const Model *m, int row)
 {
     (void)m;
@@ -269,7 +291,7 @@ void view_top(PxCanvas *c, const Model *m)
        sweep frames don't paint it over that view */
     if (m->view != V_GAMES) px_cover_shine(NULL, 0, 0, 0, 0);
     if (m->view == V_LOBBY) { lobby_top(c, m); return; }
-    if (m->view == V_LOBBY_EXIT || m->view == V_LOBBY_DISCONNECT) {
+    if (m->view == V_LOBBY_EXIT || m->view == V_LOBBY_DISCONNECT || m->view == V_FW_CONFIRM || m->view == V_FW_MISSING) {
         px_screen(c);
         px_status(c, "Banana Party", m->battery, m->charging, m->clock);
         return;
@@ -508,14 +530,29 @@ static void library_bottom_faces(PxCanvas *c, const Model *m)
     float y = LIB_FACE_Y, bw, aw;
     int disfav = m->ngames <= 0;
     int fav_on = m->gfav && !disfav;
-    px_face(c, 18, y, PX_LEFT, "B", T("Exit"), 0, &r, PX_FACE_NEUTRAL);
-    add_face_hit(r, HIT_BACK);
-    bw = px_face_w(c, "B", T("Exit"));
-    px_face(c, 18 + bw + 8, y, PX_LEFT, "X", T("Lobby"), 0, &r, PX_FACE_PRIMARY);
+    float x = 18;
+    /* the RG DS's 640x480 panel has no room for B Exit beside the rest (B still leaves); the Plus's 1024x768 has */
+    if (c->s > 1.2f) {
+        px_face(c, x, y, PX_LEFT, "B", T("Exit"), 0, &r, PX_FACE_NEUTRAL);
+        add_face_hit(r, HIT_BACK);
+        x += px_face_w(c, "B", T("Exit")) + 8;
+    }
+    px_face(c, x, y, PX_LEFT, "X", T("Lobby"), 0, &r, PX_FACE_PRIMARY);
     add_face_hit(r, HIT_LOBBY);
+    bw = px_face_w(c, "X", T("Lobby"));
+    x += bw + 8;
+    aw = px_face_w(c, "A", T("Play"));
+    {
+        /* SELECT, DS Download Play, between Lobby and Favorite: the short label where the long one doesn't fit */
+        const float room = 622 - aw - 8 - px_face_w(c, "Y", T("Favorite")) - 8 - x;
+        const char *dl = T("DS Download Play");
+        if (px_face_w(c, "SELECT", dl) > room) dl = T("Download");
+        if (px_face_w(c, "SELECT", dl) > room) dl = "";
+        px_face(c, x, y, PX_LEFT, "SELECT", dl, 0, &r, PX_FACE_NEUTRAL);
+        add_face_hit(r, HIT_DLPLAY);
+    }
     px_face(c, 622, y, PX_RIGHT, "A", T("Play"), m->ngames <= 0, &r, PX_FACE_NEUTRAL);
     add_face_hit(r, HIT_OK);
-    aw = px_face_w(c, "A", T("Play"));
     px_face(c, 622 - aw - 8, y, PX_RIGHT, "Y", T("Favorite"), disfav, &r, fav_on ? PX_FACE_FAV : PX_FACE_NEUTRAL);
     add_face_hit(r, HIT_Y);
 }
@@ -749,6 +786,31 @@ void view_bottom(PxCanvas *c, const Model *m)
         return;
     }
     if (m->view == V_GAMES) { games_bottom(c, m); return; }
+    if (m->view == V_FW_CONFIRM) {
+        g_nhits = 0;
+        px_screen(c);
+        dialog(c, T("Open the DS menu?"),
+               T("This starts your console's DS firmware. In the DS menu, choose DS Download Play to join the game another console is hosting."),
+               NULL);
+        px_face(c, 18, 422, PX_LEFT, "B", T("Cancel"), 0, &r, PX_FACE_NEUTRAL);
+        add_face_hit(r, HIT_BACK);
+        px_face(c, 622, 422, PX_RIGHT, "A", T("Open"), 0, &r, PX_FACE_PRIMARY);
+        add_face_hit(r, HIT_OK);
+        return;
+    }
+    if (m->view == V_FW_MISSING) {
+        char miss[64], line[96];
+        g_nhits = 0;
+        px_screen(c);
+        view_firmware_missing(miss, (int)sizeof miss);
+        snprintf(line, sizeof line, T("Missing: %s"), miss);
+        dialog(c, T("BIOS files missing"),
+               T("Copy your own DS BIOS and firmware to the bios folder of the SD card (/data/bios): bios7.bin, bios9.bin and firmware.bin."),
+               line);
+        px_face(c, 622, 422, PX_RIGHT, "A", T("OK"), 0, &r, PX_FACE_NEUTRAL);
+        add_face_hit(r, HIT_OK);
+        return;
+    }
     g_nhits = 0;
     px_screen(c);
     px_bubble(c, 18, 14, 604, 54, 0);
@@ -766,8 +828,7 @@ void view_bottom(PxCanvas *c, const Model *m)
         f[0].key = "B"; f[0].label = T("Back"); f[0].dis = 0;
         f[1].key = "Y"; f[1].label = T("Uninstall"); f[1].dis = inst;
         f[2].key = "A"; f[2].label = m->cursor == ROW_DISCOVER ? T("Change") : m->cursor == ROW_UPDATES ? upd_action(&m->upd) : T("Open");
-        f[2].dis = inst || (m->cursor == ROW_UPDATES && upd_running(&m->upd)) ||
-                   (m->cursor == ROW_DLPLAY && !view_firmware_ok());
+        f[2].dis = inst || (m->cursor == ROW_UPDATES && upd_running(&m->upd));
         px_faces(c, 422, 3, 2, f, hr);
         add_face_hit(hr[0], HIT_BACK);
         add_face_hit(hr[1], HIT_Y);

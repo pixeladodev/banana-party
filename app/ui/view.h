@@ -10,13 +10,16 @@
 #include <time.h>
 
 /* V_GAMES, the library, is where the app opens; V_MAIN is its settings (START) */
-enum { V_MAIN, V_UNINSTALL, V_ABOUT, V_UPDATE, V_UPDATED, V_GAMES, V_LOBBY, V_LOBBY_EXIT, V_LOBBY_DISCONNECT };
+enum { V_MAIN, V_UNINSTALL, V_ABOUT, V_UPDATE, V_UPDATED, V_GAMES, V_LOBBY, V_LOBBY_EXIT, V_LOBBY_DISCONNECT,
+       V_FW_CONFIRM, V_FW_MISSING };
 enum { ROW_DISCOVER, ROW_DLPLAY, ROW_UPDATES, ROW_ABOUT, ROW_COUNT };
 /* the settings' rows, one under the other */
 #define ROW_PITCH 60
 /* DS Download Play: the DS menu on the bundled BananaDS, from the user's own BIOS and firmware in this folder */
 #define BIOS_DIR "/data/bios"
 int view_firmware_ok(void);
+/* the files missing from BIOS_DIR, comma-separated, into buf; returns how many (0: all there) */
+int view_firmware_missing(char *buf, int n);
 enum { SORT_AZ, SORT_FAV, SORT_RECENT, SORT_COUNT };
 /* the library as a list: rows on the bottom panel at once */
 #define GAME_ROWS 6
@@ -56,7 +59,7 @@ enum { SORT_AZ, SORT_FAV, SORT_RECENT, SORT_COUNT };
 /* what a touch on the bottom panel does */
 enum {
     HIT_NONE, HIT_ROW, HIT_BACK, HIT_OK, HIT_Y, HIT_START, HIT_SORT, HIT_VIEW, HIT_RAIL_TRACK, HIT_RAIL_THUMB,
-    HIT_VRAIL_TRACK, HIT_VRAIL_THUMB, HIT_LOBBY, HIT_LOBBY_ROW, HIT_LOBBY_DISCONNECT
+    HIT_VRAIL_TRACK, HIT_VRAIL_THUMB, HIT_LOBBY, HIT_LOBBY_ROW, HIT_LOBBY_DISCONNECT, HIT_DLPLAY
 };
 
 struct Model {
@@ -87,14 +90,14 @@ struct Model {
     int gplays;
     time_t glast;
     int clock12;                 /* settings.conf's clock = 12h */
-    int from_games;              /* About opened from the library: B goes back there */
+    int from_games;              /* About or DS Download Play opened from the library: B goes back there */
     Lobby lobby;
 };
 typedef struct Model Model;
 
 enum {
     ACT_NONE, ACT_UP, ACT_DOWN, ACT_LEFT, ACT_RIGHT, ACT_OK, ACT_BACK, ACT_Y, ACT_MENU, ACT_ROW, ACT_ABOUT, ACT_SORT,
-    ACT_VIEW, ACT_FAV, ACT_RAIL, ACT_PAGE_LEFT, ACT_PAGE_RIGHT, ACT_LOBBY, ACT_LOBBY_ROW, ACT_LOBBY_DISCONNECT
+    ACT_VIEW, ACT_FAV, ACT_RAIL, ACT_PAGE_LEFT, ACT_PAGE_RIGHT, ACT_LOBBY, ACT_LOBBY_ROW, ACT_LOBBY_DISCONNECT, ACT_DLPLAY
 };
 
 typedef struct { PxRect r; int id, arg; } Hit;

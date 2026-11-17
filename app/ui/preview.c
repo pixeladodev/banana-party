@@ -528,6 +528,16 @@ int main(int argc, char **argv)
     m.lobby.in_lobby = 1;
     m.view = V_LOBBY_EXIT;
     ok &= shot(dir, "lobby-exit-app", 640, 480, "dark", "yellow", "es", &m);
+    /* DS Download Play from the library (SELECT): the question first, or which BIOS files are missing */
+    m = base();
+    snprintf(m.model, sizeof m.model, "rgds");
+    m.from_games = 1;
+    m.view = V_FW_CONFIRM;
+    ok &= shot(dir, "dlplay-confirm", 640, 480, "dark", "yellow", "es", &m);
+    ok &= shot(dir, "dlplay-confirm", 1024, 768, "light", "yellow", "en", &m);
+    m.view = V_FW_MISSING;
+    ok &= shot(dir, "dlplay-missing", 640, 480, "dark", "yellow", "es", &m);
+    ok &= shot(dir, "dlplay-missing", 1024, 768, "light", "yellow", "en", &m);
     /* the library, where the app opens: a grid scrolled sideways (X: a list), the picked game's cover on top */
     {
         static char games[PREVIEW_ROM_MAX][GAME_PATH];
