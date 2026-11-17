@@ -108,6 +108,8 @@ const PxTr view_tr[] = {
     { "Favorite", "Favorito" },
     { "Play time", "Tiempo de juego" },
     { "Last played", "Última vez" },
+    { "Multi-card", "Multicartucho" },
+    { "DS Download Play", "Descarga DS" },
     { "Not played yet", "Sin jugar todavía" },
     { "Never", "Nunca" },
     { "Under a minute", "Menos de un minuto" },
@@ -426,6 +428,23 @@ static void game_image(PxCanvas *c, const PxImage *img, float x, float y, float 
     }
 }
 
+/* under the stats: what the game plays with other consoles. One card each (GameTDB's count), and DS Download Play
+   (read from the ROM): a second badge that doesn't fit beside the first goes under it */
+static void game_badges(PxCanvas *c, const Model *m, float x, float y, float w)
+{
+    const float h = 28, gap = 8;
+    float bx = x, by = y;
+    const char *t[2];
+    int kind[2], n = 0;
+    if (m->gcaps.flags & ROM_MULTICARD) { t[n] = T("Multi-card"); kind[n++] = PX_BADGE_INFO; }
+    if (m->gcaps.flags & ROM_DLPLAY) { t[n] = T("DS Download Play"); kind[n++] = PX_BADGE_PRIMARY; }
+    for (int i = 0; i < n; i++) {
+        float bw = px_badge_w(c, h, t[i]);
+        if (bx > x && bx + bw > x + w) { bx = x; by += h + gap; }
+        bx += px_badge(c, bx, by, h, t[i], kind[i]) + gap;
+    }
+}
+
 /* top: the room first, then the picked game's cover, name, play time and last played */
 static void games_top(PxCanvas *c, const Model *m)
 {
@@ -478,6 +497,7 @@ static void games_top(PxCanvas *c, const Model *m)
             fmt_when(when, sizeof when, m->glast, m->clock12);
             stat(c, tx, slot + 2 * lh + 66, tw, T("Last played"), when, px.ink);
         } else stat(c, tx, slot + 2 * lh + 66, tw, T("Last played"), T("Never"), px.muted);
+        game_badges(c, m, tx, slot + 2 * lh + 126, tw);
     }
     if (m->err[0]) px_text_wrap(c, PX_REGULAR, 17, 42, 430, m->err, px.warn, 556, 2, 22);
     if (m->upd.state == UPD_AVAILABLE) {

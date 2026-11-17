@@ -28,5 +28,5 @@ UI=$ROOT/app/ui
 mkdir -p "$OUT"
 $CC -O2 -Wall -Wextra -I "$UI/third_party" -o "$ROOT/dist/preview-ui" \
     "$UI/preview.c" "$UI/view.c" "$UI/lobby.c" "$UI/room_ctl.c" "$UI/pixel.c" "$UI/updater.c" "$UI/pixel_png.c" \
-    "$UI/pixel_image.c" "$UI/stb_impl.c" -lm
+    "$UI/pixel_image.c" "$UI/rominfo.c" "$UI/stb_impl.c" -lm
 exec "$ROOT/dist/preview-ui" "$OUT"

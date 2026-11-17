@@ -23,7 +23,7 @@ if [ -n "${CC:-}" ]; then
     fi
     "$CC" -O2 -Wall -Wextra ${DRM_INC:+-I"$DRM_INC"} -I"$ROOT/app/ui/third_party" -o "$APP/ui/banana-party" \
         "$ROOT/app/ui/main.c" "$ROOT/app/ui/view.c" "$ROOT/app/ui/lobby.c" "$ROOT/app/ui/room_ctl.c" "$ROOT/app/ui/pixel.c" "$ROOT/app/ui/updater.c" "$ROOT/app/ui/stb_impl.c" \
-        "$ROOT/app/ui/pixel_sound.c" "$ROOT/app/ui/pixel_image.c" -ldrm -lm -ldl -lpthread
+        "$ROOT/app/ui/pixel_sound.c" "$ROOT/app/ui/pixel_image.c" "$ROOT/app/ui/rominfo.c" -ldrm -lm -ldl -lpthread
 elif docker image inspect bananads-build:1 >/dev/null 2>&1; then
     docker run --rm --platform linux/amd64 -v "$ROOT:/src:ro" -v "$APP/ui:/out" bananads-build:1 \
         /workspace/bananads-lan-test/aarch64--glibc--stable-2025.08-1/bin/aarch64-buildroot-linux-gnu-gcc \
@@ -31,7 +31,7 @@ elif docker image inspect bananads-build:1 >/dev/null 2>&1; then
         -I/workspace/bananads-lan-test/aarch64--glibc--stable-2025.08-1/aarch64-buildroot-linux-gnu/sysroot/usr/include/libdrm \
         -I/src/app/ui/third_party -o /out/banana-party \
         /src/app/ui/main.c /src/app/ui/view.c /src/app/ui/lobby.c /src/app/ui/room_ctl.c /src/app/ui/pixel.c /src/app/ui/updater.c /src/app/ui/stb_impl.c \
-        /src/app/ui/pixel_sound.c /src/app/ui/pixel_image.c -ldrm -lm -ldl -lpthread
+        /src/app/ui/pixel_sound.c /src/app/ui/pixel_image.c /src/app/ui/rominfo.c -ldrm -lm -ldl -lpthread
 else
     echo "set CC to an aarch64 gcc with libdrm, or build where bananads-build:1 exists" >&2
     exit 1

@@ -26,5 +26,5 @@ mkdir -p "$OUT" "$ROOT/dist"
 export PREVIEW_STAMP="${PREVIEW_STAMP:-$(TZ=America/Lima date +%Y%m%d-%H%M)}"
 UI=$ROOT/app/ui
 $CC -O2 -Wall -Wextra -I "$UI/third_party" -o "$ROOT/dist/preview-ui" \
-    "$UI/preview.c" "$UI/view.c" "$UI/lobby.c" "$UI/room_ctl.c" "$UI/pixel.c" "$UI/updater.c" "$UI/pixel_png.c" "$UI/pixel_image.c" "$UI/stb_impl.c" -lm
+    "$UI/preview.c" "$UI/view.c" "$UI/lobby.c" "$UI/room_ctl.c" "$UI/pixel.c" "$UI/updater.c" "$UI/pixel_png.c" "$UI/pixel_image.c" "$UI/rominfo.c" "$UI/stb_impl.c" -lm
 PREVIEW_MEDIA="${PREVIEW_MEDIA:-$ROOT/dist/preview-media}" "$ROOT/dist/preview-ui" "$OUT"

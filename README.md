@@ -58,6 +58,7 @@ A host sets the seats, and the room is open. Friends on the network can see it. 
 ## At a glance
 
 - 📚 **Library** on the Apps shelf — grid or list, favorites, play time, saves, and covers.
+- 🏷️ **Badges** on the picked game: **Multi-card** (one card per console) and **DS Download Play** (the others download it from this one). Download Play is read from the ROM itself; the multi-card list comes from [GameTDB](https://www.gametdb.com).
 - 🎮 **Launch and return** — pick a game, play on the bundled emulator build, come back to the same row.
 - 🔊 **Menu sounds** and touch-friendly rails, in **English** or **Spanish**.
 - 💾 **Saves** on the card at `/data/saves/nds` (shared with the system save folder).
@@ -107,5 +108,7 @@ The app removes its folder and tile.
 Open source (GPL v3). On-screen UI in C. **Banana Party** is what you install on the shelf. Packaging uses the local draft when `../bananads-lan/dist/bananads` is present, and otherwise the published release named in `app/manifest` (checked against `binary_sha`). `emu/lobby.nds` is copied only when that file is already on the machine. Neither file is stored in git. The player is not a second Apps app. See `build/package.sh` and `build/selftest.sh`.
 
 ## Credits
+
+The multi-card list: [GameTDB](https://www.gametdb.com), the community game database (`build/gen-multicart-table.py` builds `app/ui/multicart_table.h` from it).
 
 **Pixelado Dev** — built with AI-assisted development, reviewed on real hardware when possible. Provided as-is; see `LICENSE`.

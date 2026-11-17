@@ -52,6 +52,8 @@ static void pictures(Model *m, int h)
         st[i] = ok ? 1 : -1;
     }
     m->art_game = -1;
+    memset(&m->gcaps, 0, sizeof m->gcaps);
+    if (m->ngames > 0) rom_caps_read(m->games[m->gsel], &m->gcaps);  /* the badges, from the ROM as on the handheld */
     if (m->ngames > 0) {
         char box[GAME_PATH + 64];
         int ok = 0;

@@ -6,6 +6,7 @@
 #include "pixel_image.h"
 #include "updater.h"
 #include "lobby.h"
+#include "rominfo.h"
 
 #include <time.h>
 
@@ -92,6 +93,7 @@ struct Model {
     long gsecs;
     int gplays;
     time_t glast;
+    RomCaps gcaps;               /* the picked game's badges: one card each, DS Download Play */
     int clock12;                 /* settings.conf's clock = 12h */
     int from_games;              /* About or DS Download Play opened from the library: B goes back there */
     Lobby lobby;

@@ -935,7 +935,11 @@ static void load_images(Model *m, int quick)
 static void game_pick(Model *m, int g)
 {
     char key[GAME_PATH + 8];
-    if (m->ngames <= 0) { m->gsel = m->gtop = m->gleft = 0; m->gsave = -1; m->gsecs = 0; m->gplays = 0; m->glast = 0; return; }
+    if (m->ngames <= 0) {
+        m->gsel = m->gtop = m->gleft = 0; m->gsave = -1; m->gsecs = 0; m->gplays = 0; m->glast = 0;
+        memset(&m->gcaps, 0, sizeof m->gcaps);
+        return;
+    }
     if (g < 0) g = 0;
     if (g >= m->ngames) g = m->ngames - 1;
     m->gsel = g;
@@ -955,6 +959,7 @@ static void game_pick(Model *m, int g)
     stats_add(MENU_STATS, key, &m->gplays, &m->gsecs, &m->glast);
     stats_add(APP_STATS, key, &m->gplays, &m->gsecs, &m->glast);
     m->gfav = game_is_favorite(m->games[g]);
+    rom_caps(m->games[g], &m->gcaps);  /* kept from the first time (rominfo.c): a ROM is read once */
     game_art_pick(m);
     px_cover_shine_reset();
 }
