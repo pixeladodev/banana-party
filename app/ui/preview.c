@@ -19,14 +19,14 @@ static Model base(void)
     memset(&m, 0, sizeof m);
     m.enabled = 1;
     snprintf(m.os, sizeof m.os, "0.5.3.4");
-    snprintf(m.version, sizeof m.version, "0.4.0");
+    snprintf(m.version, sizeof m.version, "0.2.0");
     snprintf(m.model, sizeof m.model, "rgds_plus");
     snprintf(m.ip, sizeof m.ip, "192.168.18.184");
     m.battery = 82;
     snprintf(m.clock, sizeof m.clock, "14:30");
     m.upd.state = UPD_UPTODATE;
-    snprintf(m.upd.current, sizeof m.upd.current, "0.4.0");
-    snprintf(m.upd.latest, sizeof m.upd.latest, "0.4.0");
+    snprintf(m.upd.current, sizeof m.upd.current, "0.2.0");
+    snprintf(m.upd.latest, sizeof m.upd.latest, "0.2.0");
     m.dots = 2;
     m.discover = 1;
     return m;
@@ -496,7 +496,7 @@ int main(int argc, char **argv)
     m.cursor = ROW_UPDATES;
     ok &= shot(dir, "update-uptodate", 1024, 768, "dark", "yellow", "en", &m);
     m.upd.state = UPD_AVAILABLE;
-    snprintf(m.upd.latest, sizeof m.upd.latest, "0.4.1");
+    snprintf(m.upd.latest, sizeof m.upd.latest, "0.2.1");
     ok &= shot(dir, "update-available", 640, 480, "dark", "yellow", "es", &m);
     ok &= shot(dir, "update-available", 640, 480, "light", "yellow", "en", &m);
     m.view = V_UPDATE;
@@ -520,8 +520,8 @@ int main(int argc, char **argv)
     ok &= shot(dir, "update-offline", 640, 480, "light", "yellow", "en", &m);
     m.upd.state = UPD_DONE;
     m.upd.installing = 1;
-    snprintf(m.upd.current, sizeof m.upd.current, "0.4.1");
-    snprintf(m.version, sizeof m.version, "0.4.1");
+    snprintf(m.upd.current, sizeof m.upd.current, "0.2.1");
+    snprintf(m.version, sizeof m.version, "0.2.1");
     m.view = V_UPDATED;
     ok &= shot(dir, "update-done", 640, 480, "dark", "yellow", "es", &m);
     m = base();
@@ -628,7 +628,7 @@ int main(int argc, char **argv)
         }
         ok &= shot(dir, "library-list-marquee", 640, 480, "dark", "yellow", "es", &m);
         m.upd.state = UPD_AVAILABLE;
-        snprintf(m.upd.latest, sizeof m.upd.latest, "0.4.1");
+        snprintf(m.upd.latest, sizeof m.upd.latest, "0.2.1");
         ok &= shot(dir, "library-update", 640, 480, "dark", "yellow", "es", &m);
         m.ngames = 0;
         ok &= shot(dir, "library-empty", 640, 480, "dark", "yellow", "es", &m);
