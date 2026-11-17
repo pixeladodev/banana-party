@@ -531,12 +531,7 @@ static void library_bottom_faces(PxCanvas *c, const Model *m)
     int disfav = m->ngames <= 0;
     int fav_on = m->gfav && !disfav;
     float x = 18;
-    /* the RG DS's 640x480 panel has no room for B Exit beside the rest (B still leaves); the Plus's 1024x768 has */
-    if (c->s > 1.2f) {
-        px_face(c, x, y, PX_LEFT, "B", T("Exit"), 0, &r, PX_FACE_NEUTRAL);
-        add_face_hit(r, HIT_BACK);
-        x += px_face_w(c, "B", T("Exit")) + 8;
-    }
+    /* no B Exit face on any panel, so SELECT shows the same everywhere (B still leaves) */
     px_face(c, x, y, PX_LEFT, "X", T("Lobby"), 0, &r, PX_FACE_PRIMARY);
     add_face_hit(r, HIT_LOBBY);
     bw = px_face_w(c, "X", T("Lobby"));
