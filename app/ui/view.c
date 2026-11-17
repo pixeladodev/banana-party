@@ -265,6 +265,9 @@ void view_top(PxCanvas *c, const Model *m)
     const char *msg = NULL;
     uint32_t msg_rgb = px.ink;
     float hw, cw;
+    /* the cover shine belongs to the library's top screen: any other view forgets its rectangle, so main.c's
+       sweep frames don't paint it over that view */
+    if (m->view != V_GAMES) px_cover_shine(NULL, 0, 0, 0, 0);
     if (m->view == V_LOBBY) { lobby_top(c, m); return; }
     if (m->view == V_LOBBY_EXIT || m->view == V_LOBBY_DISCONNECT) {
         px_screen(c);
@@ -394,6 +397,7 @@ static void games_top(PxCanvas *c, const Model *m)
     px_status(c, "Banana Party", m->battery, m->charging, m->clock);
     px_sheet(c, 18, 60, 604, 406);
     if (m->ngames <= 0) {
+        px_cover_shine(NULL, 0, 0, 0, 0);
         px_label(c, 44, 84, T("Games"), px.ink);
         px_text_wrap(c, PX_MEDIUM, 26, 42, 110, T("No DS games in roms/nds."), px.warn, 556, 2, 32);
         px_text_wrap(c, PX_REGULAR, 18, 42, 190,

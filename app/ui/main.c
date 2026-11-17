@@ -395,7 +395,11 @@ static void shine_frame(void)
 
 static void draw(const Model *m)
 {
+    static int last_view = -1;
     PxCanvas c;
+    /* the cover shine is the library's alone: back in it, its first sweep comes 1 s later, as for a new game */
+    if (m->view == V_GAMES && last_view != V_GAMES) px_cover_shine_reset();
+    last_view = m->view;
     px_canvas(&c, g_buf[0], g_w, g_h);
     view_top(&c, m);
     shine_capture();
