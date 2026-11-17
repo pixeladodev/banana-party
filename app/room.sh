@@ -14,8 +14,14 @@ LOGS=/data/banana/logs/bananads-lan-lobby
 # For a test run only, normally absent: BananaDS settings for the room's emulator, one BANANADS_*=value a line
 # (e.g. BANANADS_LOG_TIME=on, BANANADS_LAN_TIMEOUT_MS=25 for the LAN's per-second [diag] lines). Read as the room starts.
 ROOM_ENV=${BANANADS_ROOM_ENV:-/data/bananads-lan/room.env}
+# The in-game saves: the folder BananaOS's DS launcher gives BananaDS (BANANADS_SAVE_DIR in run-bananads), so a game
+# played here reads and writes the same <game>.sav as in the menu and nothing is written beside the ROM.
+# /data/saves/nds when the launcher names no plain folder.
+SYS_LAUNCHER=/usr/libexec/banana/run-bananads
+SAVES=$(sed -n 's/^.*BANANADS_SAVE_DIR=\([^ "$;]*\).*$/\1/p' "$SYS_LAUNCHER" 2>/dev/null | head -n 1 || true)
+case $SAVES in /?*) ;; *) SAVES=/data/saves/nds ;; esac
 
-mkdir -p "$LOBBY_DIR" "$STATES" "$LOGS"
+mkdir -p "$LOBBY_DIR" "$STATES" "$LOGS" "$SAVES"
 
 room_running() {
     [ -f "$PIDF" ] || return 1
@@ -55,6 +61,8 @@ start_room() {
     : > "$LOGF"
     (
         unset BANANADS_WIFI_LOCAL
+        # saves shared with the menu's BananaDS; save states in the app's own folder (a state is tied to the build)
+        export BANANADS_SAVE_DIR="$SAVES" BANANADS_STATE_DIR="$STATES"
         if [ -f "$ROOM_ENV" ]; then
             while IFS= read -r line || [ -n "$line" ]; do
                 line=$(printf '%s' "$line" | tr -d '\r')
