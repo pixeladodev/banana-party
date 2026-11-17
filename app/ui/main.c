@@ -47,6 +47,9 @@ static uint32_t *g_buf[2];
 static char g_app[512];
 static PxRepeat g_rep;            /* the direction held down */
 static PxRepeat g_page;           /* L/R page held */
+static int g_caps_ok;             /* the picked game's badges read (else main's loop looks for them) */
+/* the badges' reader reads the games this far on either side of the picked one first (two grid pages) */
+#define CAPS_RADIUS (2 * GRID_ROWS * GRID_COLS)
 static int g_rail_drag;           /* finger on scrollbar thumb until release */
 static int g_rail_drag_gsel0;     /* selection when the drag started */
 static int g_rail_drag_x0, g_rail_drag_y0;
@@ -759,6 +762,7 @@ static void resort_games(Model *m)
     }
     if (sel >= m->ngames) sel = m->ngames > 0 ? m->ngames - 1 : 0;
     free_thumbs(m);
+    if (m->games) rcw_set_list(m->games[0], GAME_PATH, m->ngames);  /* the badges' reader on the list as it is now */
     game_pick(m, sel);
 }
 
@@ -938,6 +942,7 @@ static void game_pick(Model *m, int g)
     if (m->ngames <= 0) {
         m->gsel = m->gtop = m->gleft = 0; m->gsave = -1; m->gsecs = 0; m->gplays = 0; m->glast = 0;
         memset(&m->gcaps, 0, sizeof m->gcaps);
+        g_caps_ok = 1;
         return;
     }
     if (g < 0) g = 0;
@@ -959,7 +964,10 @@ static void game_pick(Model *m, int g)
     stats_add(MENU_STATS, key, &m->gplays, &m->gsecs, &m->glast);
     stats_add(APP_STATS, key, &m->gplays, &m->gsecs, &m->glast);
     m->gfav = game_is_favorite(m->games[g]);
-    rom_caps(m->games[g], &m->gcaps);  /* kept from the first time (rominfo.c): a ROM is read once */
+    /* the badges from the reader thread (rominfo.c): none until the ROM has been read, then they appear (main's
+       loop looks again while they're missing); the games around this one are read next */
+    rcw_focus(g, CAPS_RADIUS);
+    g_caps_ok = rcw_get(g, &m->gcaps);
     game_art_pick(m);
     px_cover_shine_reset();
 }
@@ -1393,6 +1401,24 @@ static int open_inputs(Dev *dev, int max)
     return n;
 }
 
+/* a held direction that isn't down any more stops repeating: its release can be lost (a device's events not read
+   for a while overflow the kernel's queue, which says so with SYN_DROPPED), and the selection would move on its
+   own until another button. The key's state is asked of the devices that have it */
+static void repeat_check(PxRepeat *r, const Dev *dev, int ndev)
+{
+    int i, known = 0;
+    if (!r->code) return;
+    for (i = 0; i < ndev; i++) {
+        unsigned long b[KEY_MAX / (8 * sizeof(long)) + 1];
+        if (dev[i].touch || !bit_on(dev[i].fd, EV_KEY, r->code)) continue;
+        memset(b, 0, sizeof b);
+        if (ioctl(dev[i].fd, EVIOCGKEY(sizeof b), b) < 0) continue;
+        known = 1;
+        if ((b[r->code / (8 * (int)sizeof(long))] >> (r->code % (8 * (int)sizeof(long)))) & 1) return;
+    }
+    if (known) r->code = 0;
+}
+
 static int in_rect(int hx, int hy, PxRect r)
 {
     return hx >= r.x && hx < r.x + r.w && hy >= r.y && hy < r.y + r.h;
@@ -1575,6 +1601,10 @@ int main(int argc, char **argv)
         }
         lobby_tick(&m.lobby, m.view);
         if (room_running()) room_ui_present();
+        if (m.view == V_GAMES && m.ngames > 0 && !g_caps_ok && rcw_get(m.gsel, &m.gcaps)) {
+            g_caps_ok = 1;
+            dirty = 1;
+        }
         if (m.view == V_LOBBY && m.lobby.phase == LP_JOIN_SEARCH) {
             int d = (int)((ticks() / 400) % 3) + 1;
             if (d != m.dots) { m.dots = d; dirty = 1; }
@@ -1606,6 +1636,7 @@ int main(int argc, char **argv)
             if (shine_wake == 0 && t > 8) t = 8;
             else if (shine_wake > 0 && shine_wake < t) t = shine_wake;
             if (m.view == V_LOBBY && m.lobby.phase == LP_JOIN_SEARCH && t > 200) t = 200;
+            if (m.view == V_GAMES && !g_caps_ok && t > 40) t = 40;  /* the badges' answer looked for */
             r = poll(pf, (nfds_t)ndev, t);
         }
         if (r < 0) { if (errno == EINTR) continue; break; }
@@ -1626,8 +1657,11 @@ int main(int argc, char **argv)
             if (!dirty && m.view == V_GAMES && shine_wake >= 0 && px_cover_shine_wake_ms() <= 12)
                 shine_only = 1;
             {
-                int k = px_repeat_due(&g_rep, ticks());
-                int kp = px_repeat_due_page(&g_page, ticks());
+                int k, kp;
+                repeat_check(&g_rep, dev, ndev);
+                repeat_check(&g_page, dev, ndev);
+                k = px_repeat_due(&g_rep, ticks());
+                kp = px_repeat_due_page(&g_page, ticks());
                 if (k) act = key_action(k, 1);
                 else if (kp) act = key_action(kp, 1);
             }
@@ -1689,6 +1723,11 @@ int main(int argc, char **argv)
                     }
                     continue;
                 }
+                if (ev.type == EV_SYN && ev.code == SYN_DROPPED) {
+                    repeat_check(&g_rep, dev, ndev);
+                    repeat_check(&g_page, dev, ndev);
+                    continue;
+                }
                 if (ev.type == EV_KEY) {
                     int a;
                     if (ev.value == 2) continue;     /* (the kernel's own repeat: px_repeat times it instead) */
@@ -1700,8 +1739,11 @@ int main(int argc, char **argv)
             }
         }
         if (act == ACT_NONE) {
-            int k = px_repeat_due(&g_rep, ticks());
-            int kp = px_repeat_due_page(&g_page, ticks());
+            int k, kp;
+            repeat_check(&g_rep, dev, ndev);
+            repeat_check(&g_page, dev, ndev);
+            k = px_repeat_due(&g_rep, ticks());
+            kp = px_repeat_due_page(&g_page, ticks());
             if (k) act = key_action(k, 1);
             else if (kp) act = key_action(kp, 1);
         }
@@ -1716,6 +1758,7 @@ int main(int argc, char **argv)
         if (status_tick(&m)) dirty = 1;
         if (!g_rep.code && m.view == V_GAMES && m.ngames > 0 && m.art_game != m.gsel) game_art_pick(&m);
     }
+    rcw_stop();  /* the badges' reader done (at most a read on the card) and its answers written */
     for (i = 0; i < ndev; i++) close(dev[i].fd);
     /* the last sound heard out (a game's chime, B's), then the device let go before the game or the menu takes it */
     px_sound_close(g_stop ? 0 : g_exit == PLAY_EXIT ? 800 : 400);

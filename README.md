@@ -58,7 +58,7 @@ A host sets the seats, and the room is open. Friends on the network can see it. 
 ## At a glance
 
 - 📚 **Library** on the Apps shelf — grid or list, favorites, play time, saves, and covers.
-- 🏷️ **Badges** on the picked game: **Multi-card** (one card per console) and **DS Download Play** (the others download it from this one). Download Play is read from the ROM itself; the multi-card list comes from [GameTDB](https://www.gametdb.com).
+- 🏷️ **Badges** on the picked game: **Multi-card** (one card per console) and **DS Download Play** (the others download it from this one). Download Play is read from the ROM itself, in the background (the games near the picked one first, then the whole library; a game is read once), so browsing never waits on the card; the multi-card list comes from [GameTDB](https://www.gametdb.com).
 - 🎮 **Launch and return** — pick a game, play on the bundled emulator build, come back to the same row.
 - 🔊 **Menu sounds** and touch-friendly rails, in **English** or **Spanish**.
 - 💾 **Saves** on the card at `/data/saves/nds` (shared with the system save folder).
