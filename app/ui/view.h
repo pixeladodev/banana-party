@@ -11,7 +11,12 @@
 
 /* V_GAMES, the library, is where the app opens; V_MAIN is its settings (START) */
 enum { V_MAIN, V_UNINSTALL, V_ABOUT, V_UPDATE, V_UPDATED, V_GAMES, V_LOBBY, V_LOBBY_EXIT, V_LOBBY_DISCONNECT };
-enum { ROW_DISCOVER, ROW_UPDATES, ROW_ABOUT, ROW_COUNT };
+enum { ROW_DISCOVER, ROW_DLPLAY, ROW_UPDATES, ROW_ABOUT, ROW_COUNT };
+/* the settings' rows, one under the other */
+#define ROW_PITCH 60
+/* DS Download Play: the DS menu on the bundled BananaDS, from the user's own BIOS and firmware in this folder */
+#define BIOS_DIR "/data/bios"
+int view_firmware_ok(void);
 enum { SORT_AZ, SORT_FAV, SORT_RECENT, SORT_COUNT };
 /* the library as a list: rows on the bottom panel at once */
 #define GAME_ROWS 6

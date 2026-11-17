@@ -67,6 +67,12 @@ const PxTr view_tr[] = {
       "Las partidas guardadas se comparten con el BananaDS de BananaOS. Los estados guardados van aparte." },
     { "No DS games in roms/nds.", "No hay juegos de DS en roms/nds." },
     { "Auto discovery", "Descubrimiento automático" },
+    { "DS Download Play", "Descarga DS" },
+    { "Ready", "Lista" },
+    { "Opens the DS menu with your BIOS and firmware. Choose DS Download Play there to join a game another console hosts with one card.",
+      "Abre el menú de DS con tu BIOS y firmware. Elige Descarga DS ahí para unirte a una partida que otra consola aloja con una sola tarjeta." },
+    { "Needs your DS BIOS and firmware in the bios folder of the SD card: bios7.bin, bios9.bin and firmware.bin.",
+      "Necesita tu BIOS y firmware de DS en la carpeta bios de la tarjeta SD: bios7.bin, bios9.bin y firmware.bin." },
     { "Auto discovery is on. Entering multiplayer tries to pair with someone else.",
       "Descubrimiento automático activo. Al entrar a multijugador se intentará emparejar con otra persona." },
     { "Auto discovery is off. The game plays on its own, unless you change it in BananaDS LAN's settings.",
@@ -204,6 +210,31 @@ static void add_face_hit(PxRect r, int id)
     g_hits[g_nhits].id = id;
     g_hits[g_nhits].arg = 0;
     g_nhits++;
+}
+
+/* a file in BIOS_DIR under one of `names`, of `size` bytes (0: 128, 256 or 512 KB, a firmware) */
+static int bios_has(const char *const *names, long size)
+{
+    char path[256];
+    for (; *names; names++) {
+        FILE *f;
+        long n;
+        snprintf(path, sizeof path, "%s/%s", BIOS_DIR, *names);
+        if (!(f = fopen(path, "rb"))) continue;
+        n = fseek(f, 0, SEEK_END) == 0 ? ftell(f) : -1;
+        fclose(f);
+        if (size ? n == size : n == 0x20000 || n == 0x40000 || n == 0x80000) return 1;
+    }
+    return 0;
+}
+
+/* the DS's own BIOS and firmware are there (the names BananaDS looks for) */
+int view_firmware_ok(void)
+{
+    static const char *const b9[] = { "bios9.bin", "biosnds9.rom", "bios9.rom", "nds_bios_arm9.bin", NULL };
+    static const char *const b7[] = { "bios7.bin", "biosnds7.rom", "bios7.rom", "nds_bios_arm7.bin", NULL };
+    static const char *const fw[] = { "firmware.bin", "nds_firmware.bin", "firmware.rom", "fw.bin", NULL };
+    return bios_has(b9, 4096) && bios_has(b7, 16384) && bios_has(fw, 0);
 }
 
 int view_row_enabled(const Model *m, int row)
@@ -573,11 +604,14 @@ static void row(PxCanvas *c, const Model *m, int i, float y)
     int sel = m->cursor == i && m->view == V_MAIN, dis = !view_row_enabled(m, i);
     uint32_t ink = sel && !dis ? px.on_pick : dis ? px.dim : px.ink;
     uint32_t sub = sel && !dis ? px.on_pick_sub : dis ? px.dim : px.muted;
-    const char *title = i == ROW_DISCOVER ? T("Auto discovery") : i == ROW_ABOUT ? T("About") : T("Updates");
+    const char *title = i == ROW_DISCOVER ? T("Auto discovery") : i == ROW_DLPLAY ? T("DS Download Play")
+                      : i == ROW_ABOUT ? T("About") : T("Updates");
     px_card(c, 18, y, 588, 54, sel, dis);
     px_text_fit(c, PX_MEDIUM, 20, 38, y + 14, title, ink, 0, 330, PX_LEFT);
     if (i == ROW_DISCOVER) {
         px_text_fit(c, PX_MEDIUM, 20, 584, y + 14, m->discover ? T("On") : T("Off"), ink, 0, 180, PX_RIGHT);
+    } else if (i == ROW_DLPLAY) {
+        px_text_fit(c, PX_MEDIUM, 20, 584, y + 14, view_firmware_ok() ? T("Ready") : T("Missing"), sub, 0, 180, PX_RIGHT);
     } else if (i == ROW_ABOUT) {
         /* opens with A; nothing on the right */
     } else if (i == ROW_UPDATES) {
@@ -611,13 +645,17 @@ static void help(PxCanvas *c, const Model *m)
         s = m->discover
             ? T("Auto discovery is on. Entering multiplayer tries to pair with someone else.")
             : T("Auto discovery is off. The game plays on its own, unless you change it in BananaDS LAN's settings.");
+    else if (m->cursor == ROW_DLPLAY)
+        s = view_firmware_ok()
+            ? T("Opens the DS menu with your BIOS and firmware. Choose DS Download Play there to join a game another console hosts with one card.")
+            : T("Needs your DS BIOS and firmware in the bios folder of the SD card: bios7.bin, bios9.bin and firmware.bin.");
     else if (m->cursor == ROW_ABOUT)
         s = T("Local wireless multiplayer for DS games on BananaOS: two consoles on the same Wi-Fi play together, as on a real DS.");
     else {
         upd_help(&m->upd, "Banana Party", buf, sizeof buf);
         s = buf;
     }
-    px_text_wrap(c, PX_REGULAR, 18, 30, 84 + ROW_COUNT * 66 + 8, s, px.muted, 574, 4, 26);
+    px_text_wrap(c, PX_REGULAR, 18, 30, 84 + ROW_COUNT * ROW_PITCH + 4, s, px.muted, 574, 3, 24);
 }
 
 /* a question over the list: a card in the middle, its two answers on the face row */
@@ -713,8 +751,8 @@ void view_bottom(PxCanvas *c, const Model *m)
     px_text_fit(c, PX_MEDIUM, 26, 38, 25, T("Settings"), px.ink, 0, 440, PX_LEFT);
     snprintf(count, sizeof count, "%02d/%02d", m->cursor + 1, ROW_COUNT);
     px_text(c, PX_MEDIUM, 19, 602 - px_text_w(c, PX_MEDIUM, 19, count, 0), 30, count, px.muted, 0);
-    for (i = 0; i < ROW_COUNT; i++) row(c, m, i, 84 + i * 66);
-    px_rail(c, 615, 84, ROW_COUNT * 66 - 12, m->cursor, 1, ROW_COUNT, NULL, NULL);
+    for (i = 0; i < ROW_COUNT; i++) row(c, m, i, 84 + i * ROW_PITCH);
+    px_rail(c, 615, 84, ROW_COUNT * ROW_PITCH - 12, m->cursor, 1, ROW_COUNT, NULL, NULL);
     help(c, m);
 
     if (m->view == V_MAIN) {
@@ -724,7 +762,8 @@ void view_bottom(PxCanvas *c, const Model *m)
         f[0].key = "B"; f[0].label = T("Back"); f[0].dis = 0;
         f[1].key = "Y"; f[1].label = T("Uninstall"); f[1].dis = inst;
         f[2].key = "A"; f[2].label = m->cursor == ROW_DISCOVER ? T("Change") : m->cursor == ROW_UPDATES ? upd_action(&m->upd) : T("Open");
-        f[2].dis = inst || (m->cursor == ROW_UPDATES && upd_running(&m->upd));
+        f[2].dis = inst || (m->cursor == ROW_UPDATES && upd_running(&m->upd)) ||
+                   (m->cursor == ROW_DLPLAY && !view_firmware_ok());
         px_faces(c, 422, 3, 2, f, hr);
         add_face_hit(hr[0], HIT_BACK);
         add_face_hit(hr[1], HIT_Y);

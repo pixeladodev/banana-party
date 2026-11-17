@@ -68,7 +68,7 @@ play() {
     )
     rc=$?
     drop_ra_progress
-    record_play "$1" "$started"
+    [ "$1" = @firmware ] || record_play "$1" "$started"
     restore_pid
     # the app's clocks again (systems.conf's perf for [storeapps], as banana-ui set them when the app started)
     command -v banana-perf >/dev/null 2>&1 && banana-perf balanced 2>/dev/null

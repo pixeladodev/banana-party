@@ -125,7 +125,8 @@ off)
 play)
     rom=${2:-}
     zd=
-    [ -n "$rom" ] && [ -f "$rom" ] || { echo "room.sh: no game at '$rom'" >&2; exit 2; }
+    # @firmware: the DS menu (DS Download Play) from the user's BIOS and firmware, the cart slot empty
+    [ "$rom" = @firmware ] || { [ -n "$rom" ] && [ -f "$rom" ]; } || { echo "room.sh: no game at '$rom'" >&2; exit 2; }
     case $rom in
     *.zip|*.ZIP)
         zd=$(mktemp -d)
@@ -136,7 +137,7 @@ play)
         ;;
     esac
     room_running || start_room off
-    [ -x /usr/libexec/banana/nds-saves ] && /usr/libexec/banana/nds-saves "$rom" || true
+    [ "$rom" = @firmware ] || { [ -x /usr/libexec/banana/nds-saves ] && /usr/libexec/banana/nds-saves "$rom" || true; }
     perf=$(awk '/^\[/{s=$0} s=="[nds]" && /^ *perf *=/{sub(/^ *perf *= */,""); print; exit}' "${BANANA_SYSTEMS:-/run/banana/systems.conf}" 2>/dev/null || true)
     command -v banana-perf >/dev/null 2>&1 && banana-perf "${perf:-superdrastic}" 2>/dev/null || true
     if [ -f /run/banana/game.pid ]; then

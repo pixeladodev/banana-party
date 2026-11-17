@@ -1267,6 +1267,13 @@ static int handle(Model *m, int act, int arg)
     case ACT_OK:
         if (m->cursor == ROW_ABOUT) { m->from_games = 0; m->view = V_ABOUT; break; }
         if (m->cursor == ROW_DISCOVER) { m->discover = !m->discover; save_ui_conf(m); break; }
+        if (m->cursor == ROW_DLPLAY) {
+            /* the DS menu on the bundled BananaDS (tile.sh: room.sh play @firmware) */
+            if (!view_firmware_ok() || upd_installing(&m->upd)) break;
+            if (!write_line(PLAY_FILE, "@firmware")) break;
+            g_exit = PLAY_EXIT;
+            return 1;
+        }
         /* fall through */
     case ACT_LEFT:
     case ACT_RIGHT:
