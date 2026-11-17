@@ -63,6 +63,8 @@ static int g_exit;                /* UPD_RESTART after an update: tile.sh opens 
    games it opened (playstats.tsv as the menu writes its own: <system>/<rom> TAB plays TAB seconds TAB last) */
 #define DATA_DIR "/data/bananads-lan"
 #define UI_CONF DATA_DIR "/ui.conf"
+/* there once the first launch has looked for the DS's BIOS and firmware (V_BIOS_NOTICE when they were missing) */
+#define BIOS_NOTICE_FILE DATA_DIR "/bios-notice"
 #define APP_STATS DATA_DIR "/playstats.tsv"
 #define MENU_STATS "/data/banana/playstats.tsv"
 #define FAVORITES_FILE "/data/banana/favorites.txt"
@@ -1101,6 +1103,10 @@ static void dlplay_ask(Model *m, int from_games)
 /* one action; returns 1 to leave */
 static int handle(Model *m, int act, int arg)
 {
+    if (m->view == V_BIOS_NOTICE) {
+        if (act == ACT_OK || act == ACT_BACK) m->view = V_GAMES;
+        return 0;
+    }
     if (m->view == V_FW_CONFIRM || m->view == V_FW_MISSING) {
         if (act == ACT_OK && m->view == V_FW_CONFIRM && view_firmware_ok()) {
             /* the DS menu on the bundled BananaDS (tile.sh: room.sh play @firmware) */
@@ -1531,6 +1537,12 @@ int main(int argc, char **argv)
         /* a look for a newer version as it opens (in the background: no network just says so); not each time a
            game ends */
         if (!(argc > 1 && !strcmp(argv[1], "--games"))) upd_start(&m.upd, g_app, "banana-party", 0);
+        /* the first launch: where the DS's BIOS and firmware go when they aren't there (DS Download Play), once */
+        if (access(BIOS_NOTICE_FILE, F_OK) != 0) {
+            if (!view_firmware_ok()) m.view = V_BIOS_NOTICE;
+            mkdir(DATA_DIR, 0755);
+            write_line(BIOS_NOTICE_FILE, "1");
+        }
     }
     status_tick(&m);
     m.dots = 1;

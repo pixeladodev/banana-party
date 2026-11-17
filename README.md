@@ -6,6 +6,7 @@
 
 <p align="center">
   <a href="#at-a-glance">At a glance</a> ·
+  <a href="#requirements">Requirements</a> ·
   <a href="#get-it-on-your-card">Get it on your card</a>
 </p>
 
@@ -61,6 +62,20 @@ A host sets the seats, and the room is open. Friends on the network can see it. 
 - 🔊 **Menu sounds** and touch-friendly rails, in **English** or **Spanish**.
 - 💾 **Saves** on the card at `/data/saves/nds` (shared with the system save folder).
 - 🔄 **Updates** from inside the app when a release is available.
+
+## Requirements
+
+- A handheld running **BananaOS**.
+- Your DS games (`.nds`) in the **roms/nds** folder on the card.
+- **Optional, for DS Download Play:** your own console's DS BIOS and firmware in the **bios** folder at the root of the card (`/bios`, next to **banana**, **bananads** and **roms**, as you see it over file sharing or in the BananaOS file explorer):
+
+  | File | Size |
+  | --- | --- |
+  | `bios7.bin` | 16 KB |
+  | `bios9.bin` | 4 KB |
+  | `firmware.bin` | 256 KB |
+
+  Banana Party doesn't include them. Everything else works without them; if they're missing, the app says which ones on its first launch.
 
 ## Get it on your card
 

@@ -74,14 +74,17 @@ const PxTr view_tr[] = {
       "Se cargará el firmware de DS de tu consola. En el menú de DS, elige Descarga DS para unirte a la partida que aloja otra consola." },
     { "BIOS files missing", "Faltan archivos de la BIOS" },
     { "Missing: %s", "Faltan: %s" },
-    { "Copy your own DS BIOS and firmware to the bios folder of the SD card (/data/bios): bios7.bin, bios9.bin and firmware.bin.",
-      "Copia la BIOS y el firmware de tu propia DS en la carpeta bios de la tarjeta SD (/data/bios): bios7.bin, bios9.bin y firmware.bin." },
+    { "Copy your own DS BIOS and firmware to the bios folder at the root of the card (/bios): bios7.bin, bios9.bin and firmware.bin.",
+      "Copia la BIOS y el firmware de tu propia DS en la carpeta bios de la raíz de la tarjeta (/bios): bios7.bin, bios9.bin y firmware.bin." },
+    { "Optional: DS Download Play", "Opcional: Descarga DS" },
+    { "To join a game with DS Download Play, copy your own DS files to the bios folder at the root of the card (/bios, next to banana, bananads and roms): bios7.bin (16 KB), bios9.bin (4 KB) and firmware.bin (256 KB). If they're already on the SD card, copy them there with the BananaOS file explorer. Everything else works without them.",
+      "Para unirte a una partida con Descarga DS, copia los archivos de tu propia DS en la carpeta bios de la raíz de la tarjeta (/bios, junto a banana, bananads y roms): bios7.bin (16 KB), bios9.bin (4 KB) y firmware.bin (256 KB). Si ya los tienes en la tarjeta SD, cópialos ahí con el explorador de archivos de BananaOS. Todo lo demás funciona sin ellos." },
     { "OK", "Aceptar" },
     { "Ready", "Lista" },
     { "Opens the DS menu with your BIOS and firmware. Choose DS Download Play there to join a game another console hosts with one card.",
       "Abre el menú de DS con tu BIOS y firmware. Elige Descarga DS ahí para unirte a una partida que otra consola aloja con una sola tarjeta." },
-    { "Needs your DS BIOS and firmware in the bios folder of the SD card: bios7.bin, bios9.bin and firmware.bin.",
-      "Necesita tu BIOS y firmware de DS en la carpeta bios de la tarjeta SD: bios7.bin, bios9.bin y firmware.bin." },
+    { "Needs your DS BIOS and firmware in the bios folder at the root of the card (/bios): bios7.bin, bios9.bin and firmware.bin.",
+      "Necesita tu BIOS y firmware de DS en la carpeta bios de la raíz de la tarjeta (/bios): bios7.bin, bios9.bin y firmware.bin." },
     { "Auto discovery is on. Entering multiplayer tries to pair with someone else.",
       "Descubrimiento automático activo. Al entrar a multijugador se intentará emparejar con otra persona." },
     { "Auto discovery is off. The game plays on its own, unless you change it in BananaDS LAN's settings.",
@@ -291,7 +294,8 @@ void view_top(PxCanvas *c, const Model *m)
        sweep frames don't paint it over that view */
     if (m->view != V_GAMES) px_cover_shine(NULL, 0, 0, 0, 0);
     if (m->view == V_LOBBY) { lobby_top(c, m); return; }
-    if (m->view == V_LOBBY_EXIT || m->view == V_LOBBY_DISCONNECT || m->view == V_FW_CONFIRM || m->view == V_FW_MISSING) {
+    if (m->view == V_LOBBY_EXIT || m->view == V_LOBBY_DISCONNECT || m->view == V_FW_CONFIRM || m->view == V_FW_MISSING ||
+        m->view == V_BIOS_NOTICE) {
         px_screen(c);
         px_status(c, "Banana Party", m->battery, m->charging, m->clock);
         return;
@@ -684,7 +688,7 @@ static void help(PxCanvas *c, const Model *m)
     else if (m->cursor == ROW_DLPLAY)
         s = view_firmware_ok()
             ? T("Opens the DS menu with your BIOS and firmware. Choose DS Download Play there to join a game another console hosts with one card.")
-            : T("Needs your DS BIOS and firmware in the bios folder of the SD card: bios7.bin, bios9.bin and firmware.bin.");
+            : T("Needs your DS BIOS and firmware in the bios folder at the root of the card (/bios): bios7.bin, bios9.bin and firmware.bin.");
     else if (m->cursor == ROW_ABOUT)
         s = T("Local wireless multiplayer for DS games on BananaOS: two consoles on the same Wi-Fi play together, as on a real DS.");
     else {
@@ -793,16 +797,27 @@ void view_bottom(PxCanvas *c, const Model *m)
         add_face_hit(r, HIT_OK);
         return;
     }
-    if (m->view == V_FW_MISSING) {
+    if (m->view == V_BIOS_NOTICE || m->view == V_FW_MISSING) {
+        /* where the DS's BIOS and firmware go: on the first launch without them (once, main.c's
+           BIOS_NOTICE_FILE), and when DS Download Play is asked for without them */
+        const int notice = m->view == V_BIOS_NOTICE;
         char miss[64], line[96];
+        float y;
         g_nhits = 0;
         px_screen(c);
         view_firmware_missing(miss, (int)sizeof miss);
         snprintf(line, sizeof line, T("Missing: %s"), miss);
-        dialog(c, T("BIOS files missing"),
-               T("Copy your own DS BIOS and firmware to the bios folder of the SD card (/data/bios): bios7.bin, bios9.bin and firmware.bin."),
-               line);
-        px_face(c, 622, 422, PX_RIGHT, "A", T("OK"), 0, &r, PX_FACE_NEUTRAL);
+        px_rect_a(c, 0, 0, 640, 480, 0x000000, px.light ? 70 : 150);
+        px_card(c, 34, 70, 572, 290, 0, 0);
+        px_text_wrap(c, PX_MEDIUM, 24, 58, 92, notice ? T("Optional: DS Download Play") : T("BIOS files missing"),
+                     px.ink, 524, 1, 30);
+        y = 140;
+        y += 24 * px_text_wrap(c, PX_REGULAR, 17, 58, y,
+                               notice ? T("To join a game with DS Download Play, copy your own DS files to the bios folder at the root of the card (/bios, next to banana, bananads and roms): bios7.bin (16 KB), bios9.bin (4 KB) and firmware.bin (256 KB). If they're already on the SD card, copy them there with the BananaOS file explorer. Everything else works without them.")
+                                      : T("Copy your own DS BIOS and firmware to the bios folder at the root of the card (/bios): bios7.bin, bios9.bin and firmware.bin."),
+                               px.muted, 524, 8, 24);
+        px_text_fit(c, PX_REGULAR, 17, 58, y + 10, line, px.ink, 0, 524, PX_LEFT);
+        px_face(c, 622, 422, PX_RIGHT, "A", T("OK"), 0, &r, notice ? PX_FACE_PRIMARY : PX_FACE_NEUTRAL);
         add_face_hit(r, HIT_OK);
         return;
     }

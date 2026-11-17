@@ -11,12 +11,12 @@
 
 /* V_GAMES, the library, is where the app opens; V_MAIN is its settings (START) */
 enum { V_MAIN, V_UNINSTALL, V_ABOUT, V_UPDATE, V_UPDATED, V_GAMES, V_LOBBY, V_LOBBY_EXIT, V_LOBBY_DISCONNECT,
-       V_FW_CONFIRM, V_FW_MISSING };
+       V_FW_CONFIRM, V_FW_MISSING, V_BIOS_NOTICE };
 enum { ROW_DISCOVER, ROW_DLPLAY, ROW_UPDATES, ROW_ABOUT, ROW_COUNT };
 /* the settings' rows, one under the other */
 #define ROW_PITCH 60
 /* DS Download Play: the DS menu on the bundled BananaDS, from the user's own BIOS and firmware in this folder */
-#define BIOS_DIR "/data/bios"
+#define BIOS_DIR "/data/bios"   /* the card's root is /data: players see it as the bios folder, /bios */
 int view_firmware_ok(void);
 /* the files missing from BIOS_DIR, comma-separated, into buf; returns how many (0: all there) */
 int view_firmware_missing(char *buf, int n);
