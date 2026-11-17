@@ -35,4 +35,9 @@ for bad in "BANANADS_LINK" "wifi-link" "Connection row" "Nearby consoles" "88a43
         exit 1
     fi
 done
+# The emulator version comes from app/manifest: write {emulator_version}, never a number
+if grep -Eq 'bananads-lan\**[[:space:]]+\**[0-9]' "$file"; then
+    echo "check-release-notes: $file names a bananads-lan version; write {emulator_version} (filled from app/manifest)" >&2
+    exit 1
+fi
 echo "check-release-notes: ok ($file)"
