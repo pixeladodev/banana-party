@@ -11,6 +11,9 @@ EMU=$APP/emu/bananads
 ROM=$APP/emu/lobby.nds
 STATES=/data/states/nds-lan-lobby
 LOGS=/data/banana/logs/bananads-lan-lobby
+# For a test run only, normally absent: BananaDS settings for the room's emulator, one BANANADS_*=value a line
+# (e.g. BANANADS_LOG_TIME=on, BANANADS_LAN_TIMEOUT_MS=25 for the LAN's per-second [diag] lines). Read as the room starts.
+ROOM_ENV=${BANANADS_ROOM_ENV:-/data/bananads-lan/room.env}
 
 mkdir -p "$LOBBY_DIR" "$STATES" "$LOGS"
 
@@ -52,6 +55,15 @@ start_room() {
     : > "$LOGF"
     (
         unset BANANADS_WIFI_LOCAL
+        if [ -f "$ROOM_ENV" ]; then
+            while IFS= read -r line || [ -n "$line" ]; do
+                line=$(printf '%s' "$line" | tr -d '\r')
+                case $line in
+                BANANADS_WIFI_LOCAL=* | BANANADS_DATA=* | BANANADS_LOGDIR=* | BANANADS_FRONTEND=*) ;;
+                BANANADS_[A-Z0-9_]*=*) export "$line" ;;
+                esac
+            done < "$ROOM_ENV"
+        fi
         BANANADS_DATA=/data/bananads BANANADS_LOGDIR="$LOGS" \
         BANANADS_FRONTEND=headless BANANADS_TOP=${BANANA_TOP:-DSI-2} \
         exec "$EMU" --frontend headless \
