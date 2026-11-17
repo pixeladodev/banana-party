@@ -1135,6 +1135,9 @@ static int handle(Model *m, int act, int arg)
         if (act == ACT_OK && m->view == V_FW_CONFIRM && view_firmware_ok()) {
             /* the DS menu on the bundled BananaDS (tile.sh: room.sh play @firmware) */
             if (write_line(PLAY_FILE, "@firmware")) {
+                /* back from it (tile.sh --games) the library opens on the game picked now: without this it opened
+                   on whichever game was last started from the list, often another one */
+                if (m->ngames > 0 && m->gsel >= 0 && m->gsel < m->ngames) write_line(LAST_FILE, m->games[m->gsel]);
                 g_exit = PLAY_EXIT;
                 return 1;
             }
