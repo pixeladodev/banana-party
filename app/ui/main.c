@@ -1167,7 +1167,28 @@ static int handle(Model *m, int act, int arg)
         if (lobby_handle(m, act, arg)) return 0;
         return 0;
     }
+    if (m->view == V_GAME_OPTS) {
+        /* X's menu for the picked game: A (or a touch on a row) does the row's thing and closes it */
+        if (act == ACT_UP && m->opt_cursor > 0) m->opt_cursor--;
+        else if (act == ACT_DOWN && m->opt_cursor < OPT_COUNT - 1) m->opt_cursor++;
+        else if (act == ACT_ROW || act == ACT_OK) {
+            if (act == ACT_ROW && arg >= 0 && arg < OPT_COUNT) m->opt_cursor = arg;
+            if (m->opt_cursor == OPT_FAVORITE) toggle_favorite(m);
+            m->view = V_GAMES;
+        } else if (act == ACT_BACK || act == ACT_LOBBY)
+            m->view = V_GAMES;
+        return 0;
+    }
     if (m->view == V_GAMES) {
+        /* X: the picked game's options; Y: the Party */
+        if (act == ACT_LOBBY) {
+            if (m->ngames > 0) {
+                m->opt_cursor = 0;
+                m->view = V_GAME_OPTS;
+            }
+            return 0;
+        }
+        if (act == ACT_FAV) act = ACT_LOBBY;
         switch (act) {
         case ACT_LOBBY:
             m->err[0] = 0;
@@ -1215,9 +1236,6 @@ static int handle(Model *m, int act, int arg)
             save_ui_conf(m);
             free_thumbs(m);
             game_pick(m, m->gsel);
-            break;
-        case ACT_FAV:
-            toggle_favorite(m);
             break;
         case ACT_PAGE_LEFT:
             library_page(m, -1);

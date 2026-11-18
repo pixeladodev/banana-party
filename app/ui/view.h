@@ -12,7 +12,9 @@
 
 /* V_GAMES, the library, is where the app opens; V_MAIN is its settings (START) */
 enum { V_MAIN, V_UNINSTALL, V_ABOUT, V_UPDATE, V_UPDATED, V_GAMES, V_LOBBY, V_LOBBY_EXIT, V_LOBBY_DISCONNECT,
-       V_FW_CONFIRM, V_FW_MISSING, V_BIOS_NOTICE, V_FW_RESET };
+       V_FW_CONFIRM, V_FW_MISSING, V_BIOS_NOTICE, V_FW_RESET, V_GAME_OPTS };
+/* X in the library: the picked game's options, one row each (more can join the list) */
+enum { OPT_FAVORITE, OPT_COUNT };
 enum { ROW_DISCOVER, ROW_DLPLAY, ROW_UPDATES, ROW_ABOUT, ROW_COUNT };
 /* the settings' rows, one under the other */
 #define ROW_PITCH 60
@@ -96,6 +98,7 @@ struct Model {
     RomCaps gcaps;               /* the picked game's badges: one card each, DS Download Play */
     int clock12;                 /* settings.conf's clock = 12h */
     int from_games;              /* About or DS Download Play opened from the library: B goes back there */
+    int opt_cursor;              /* V_GAME_OPTS: the row picked */
     Lobby lobby;
 };
 typedef struct Model Model;
@@ -118,5 +121,12 @@ int view_row_enabled(const Model *m, int row);
 /* a game's name as the list shows it: its file name without the folder and the extension */
 void view_game_name(const char *path, char *dst, int n);
 int game_is_favorite(const char *rom);
+/* the notes shown before the DS menu opens (DS Download Play), each one line of text; returns how many */
+#define DLPLAY_HINTS 4
+int view_dlplay_hints(const Model *m, char out[][320], int max);
+/* a ping in ms as the Party shows it: success up to 5 ms, warning up to 15 ms, danger past that */
+uint32_t view_ping_rgb(int ms);
+#define PING_OK_MS 5
+#define PING_WARN_MS 15
 
 #endif

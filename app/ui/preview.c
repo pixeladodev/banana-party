@@ -537,6 +537,27 @@ int main(int argc, char **argv)
     m.view = V_FW_CONFIRM;
     ok &= shot(dir, "dlplay-confirm", 640, 480, "dark", "yellow", "es", &m);
     ok &= shot(dir, "dlplay-confirm", 1024, 768, "light", "yellow", "en", &m);
+    /* its notes: auto discovery off with no Party; the Party's host with a slow guest; a guest far from the host */
+    m.discover = 0;
+    ok &= shot(dir, "dlplay-confirm-nodiscover", 640, 480, "dark", "yellow", "es", &m);
+    ok &= shot(dir, "dlplay-confirm-nodiscover", 1024, 768, "light", "yellow", "en", &m);
+    m.discover = 1;
+    m.lobby.in_lobby = 1;
+    m.lobby.role = 0;
+    m.lobby.nmembers = 2;
+    pack_member(&m.lobby, 0, "Carlos", 0, "game_host", -1, "192.168.18.184");
+    m.lobby.member_me[0] = 1;
+    pack_member(&m.lobby, 1, "Macos", 1, "idle", 12, "192.168.18.185");
+    ok &= shot(dir, "dlplay-confirm-host", 640, 480, "dark", "yellow", "es", &m);
+    ok &= shot(dir, "dlplay-confirm-host", 1024, 768, "light", "yellow", "en", &m);
+    m.lobby.role = 1;
+    pack_member(&m.lobby, 0, "Macos", 0, "game_host", 22, "192.168.18.185");
+    m.lobby.member_me[0] = 0;
+    pack_member(&m.lobby, 1, "Carlos", 1, "idle", -1, "192.168.18.184");
+    m.lobby.member_me[1] = 1;
+    ok &= shot(dir, "dlplay-confirm-guest", 640, 480, "dark", "yellow", "es", &m);
+    ok &= shot(dir, "dlplay-confirm-guest", 1024, 768, "light", "yellow", "en", &m);
+    memset(&m.lobby, 0, sizeof m.lobby);
     m.view = V_FW_MISSING;
     ok &= shot(dir, "dlplay-missing", 640, 480, "dark", "yellow", "es", &m);
     ok &= shot(dir, "dlplay-missing", 1024, 768, "light", "yellow", "en", &m);
@@ -581,6 +602,12 @@ int main(int argc, char **argv)
         ok &= shot(dir, "library-grid", 640, 480, "dark", "yellow", "es", &m);
         ok &= shot(dir, "library-grid", 1024, 768, "light", "yellow", "en", &m);
         ok &= shot(dir, "library-grid", 640, 480, "user:sakura", "yellow", "es", &m);
+        /* X: the picked game's options */
+        m.view = V_GAME_OPTS;
+        m.opt_cursor = 0;
+        ok &= shot(dir, "library-options", 640, 480, "dark", "yellow", "es", &m);
+        ok &= shot(dir, "library-options", 1024, 768, "light", "yellow", "en", &m);
+        m.view = V_GAMES;
         /* further along: the cover-less game shows the icon from its ROM */
         m.gsel = 5;
         m.gleft = 1;

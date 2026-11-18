@@ -167,10 +167,9 @@ float lobby_library_status(PxCanvas *c, const Model *m, float y)
             nw = px_text_fit(c, PX_MEDIUM, 16, gx, gy, lb->members[g], px.ink, 0,
                              guest_w - you_w - 8 - pw, PX_LEFT);
             if (me) px_text(c, PX_MEDIUM, 16, gx + nw + 6, gy, T("(you)"), you_rgb, 0);
-            if (lb->member_ping[g] >= 0) {
-                uint32_t base = lb->member_ping[g] > 50 ? px.red : px.green;
-                prgb = px.light ? px_mix(base, 0x000000, 0.2f) : px_mix(base, 0xffffff, 0.45f);
-            } else
+            if (lb->member_ping[g] >= 0)
+                prgb = view_ping_rgb(lb->member_ping[g]);
+            else
                 prgb = px.muted;
             px_text(c, PX_MEDIUM, 16, gx + nw + you_w + 8, gy, ping, prgb, 0);
             gx += need + 14;
@@ -505,7 +504,8 @@ static void lobby_member_list(PxCanvas *c, const Model *m, float y)
             int sk = member_badge(m->lobby.member_status[i], &st);
             if (st) px_badge(c, 250, row_y + 10, 26, st, sk);
         }
-        px_text_fit(c, PX_MEDIUM, 16, 390, row_y + 14, ping, px.ink, 0, 80, PX_LEFT);
+        px_text_fit(c, PX_MEDIUM, 16, 390, row_y + 14, ping,
+                    m->lobby.member_ping[i] >= 0 ? view_ping_rgb(m->lobby.member_ping[i]) : px.ink, 0, 80, PX_LEFT);
         px_text_fit(c, PX_MEDIUM, 16, 478, row_y + 14, m->lobby.member_ip[i][0] ? m->lobby.member_ip[i] : "-", px.ink, 0,
                     130, PX_LEFT);
     }
@@ -584,7 +584,7 @@ int lobby_handle(Model *m, int act, int arg)
         m->view = V_LOBBY_DISCONNECT;
         return 1;
     }
-    if (act == ACT_BACK && lb->phase == LP_CHOOSE) {
+    if ((act == ACT_BACK || act == ACT_FAV) && lb->phase == LP_CHOOSE) {
         m->view = V_GAMES;
         return 1;
     }

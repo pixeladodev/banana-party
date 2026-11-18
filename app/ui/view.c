@@ -203,6 +203,15 @@ const PxTr view_tr[] = {
       "Elige una Party. Cada quien abre su juego." },
     { "You leave this Party. The host's Party stays open.",
       "Sales tú. La Party del anfitrión sigue." },
+    { "Options", "Opciones" },
+    { "Tip: join a Party first, so another console is the host and sends the game.",
+      "Consejo: únete primero a una Party, para que otra consola sea el anfitrión y envíe el juego." },
+    { "You're the Party host: usually you open the game and the others open DS Download Play. You can still receive a game another console sends.",
+      "Eres el anfitrión de la Party: normalmente tú abres el juego y los demás abren Descarga DS. Aun así, puedes recibir un juego que envíe otra consola." },
+    { "Ping to %s: %d ms. Some games may run slow. Direct Link may lower the latency if you try it.",
+      "Ping con %s: %d ms. Algunos juegos pueden ir lentos. Direct Link puede bajar la latencia si lo pruebas." },
+    { "Auto discovery is off, so the DS menu won't find anyone. You can still open it to change your DS settings.",
+      "Descubrimiento automático desactivado: el menú de DS no encontrará a nadie. Aun así, puedes abrirlo para cambiar los ajustes de tu DS." },
     { NULL, NULL }
 };
 
@@ -262,6 +271,47 @@ int view_firmware_copy(void)
     return access(FW_COPY, F_OK) == 0 || getenv("PREVIEW_FW_COPY") != NULL;  /* (preview.c: as if there) */
 }
 
+uint32_t view_ping_rgb(int ms)
+{
+    const int kind = ms <= PING_OK_MS ? PX_BADGE_SUCCESS : ms <= PING_WARN_MS ? PX_BADGE_WARNING : PX_BADGE_DANGER;
+    uint32_t base = kind == PX_BADGE_SUCCESS ? px.green : kind == PX_BADGE_DANGER ? px.red
+                    : px.light ? 0xc4841a : 0xe0a030;  /* (pixel.c's warning badge) */
+    return px.light ? px_mix(base, 0x000000, 0.2f) : px_mix(base, 0xffffff, 0.45f);
+}
+
+/* DS Download Play's notes, by what this console is in:
+   - no Party: Auto on joins the first DS menu session it hears (BananaDS LAN's Auto Join, never a host), so a Party
+     first makes the host the console that sends the game; with auto discovery off nothing is joined at all;
+   - the Party's host: the session's host is not the game's, so it can still receive, but usually it sends;
+   - the ping that matters: the game's frames go straight between the console that sends the game and each one that
+     receives it (each console reaches every other one directly), so a guest's is the ping to the Party's host (who
+     usually sends) and the host's is the slowest guest's. */
+int view_dlplay_hints(const Model *m, char out[][320], int max)
+{
+    const Lobby *lb = &m->lobby;
+    int n = 0, i, worst = -1, who = -1;
+    if (max <= 0) return 0;
+    if (!lb->in_lobby) {
+        snprintf(out[n++], 320, "%s", T("Tip: join a Party first, so another console is the host and sends the game."));
+        if (!m->discover && n < max)
+            snprintf(out[n++], 320, "%s",
+                     T("Auto discovery is off, so the DS menu won't find anyone. You can still open it to change your DS settings."));
+        return n;
+    }
+    if (lb->role == 0)
+        snprintf(out[n++], 320, "%s",
+                 T("You're the Party host: usually you open the game and the others open DS Download Play. You can still receive a game another console sends."));
+    for (i = 0; i < lb->nmembers; i++) {
+        if (!lb->members[i][0] || lb->member_me[i] || lb->member_ping[i] < 0) continue;
+        if (lb->role != 0 && lb->roles[i] != 0) continue;   /* a guest: the host's ping */
+        if (lb->member_ping[i] > worst) { worst = lb->member_ping[i]; who = i; }
+    }
+    if (who >= 0 && worst > PING_OK_MS && n < max)
+        snprintf(out[n++], 320, T("Ping to %s: %d ms. Some games may run slow. Direct Link may lower the latency if you try it."),
+                 lb->members[who], worst);
+    return n;
+}
+
 int view_firmware_missing(char *buf, int n)
 {
     static const char *const b9[] = { "bios9.bin", "biosnds9.rom", "bios9.rom", "nds_bios_arm9.bin", NULL };
@@ -305,7 +355,7 @@ void view_top(PxCanvas *c, const Model *m)
     float hw, cw;
     /* the cover shine belongs to the library's top screen: any other view forgets its rectangle, so main.c's
        sweep frames don't paint it over that view */
-    if (m->view != V_GAMES) px_cover_shine(NULL, 0, 0, 0, 0);
+    if (m->view != V_GAMES && m->view != V_GAME_OPTS) px_cover_shine(NULL, 0, 0, 0, 0);
     if (m->view == V_LOBBY) { lobby_top(c, m); return; }
     if (m->view == V_LOBBY_EXIT || m->view == V_LOBBY_DISCONNECT || m->view == V_FW_CONFIRM || m->view == V_FW_MISSING ||
         m->view == V_BIOS_NOTICE || m->view == V_FW_RESET) {
@@ -313,7 +363,7 @@ void view_top(PxCanvas *c, const Model *m)
         px_status(c, "Banana Party", m->battery, m->charging, m->clock);
         return;
     }
-    if (m->view == V_GAMES) { games_top(c, m); return; }
+    if (m->view == V_GAMES || m->view == V_GAME_OPTS) { games_top(c, m); return; }
     px_screen(c);
     px_status(c, "Banana Party", m->battery, m->charging, m->clock);
     px_sheet(c, 18, 60, 604, 406);
@@ -567,14 +617,14 @@ static void library_bottom_faces(PxCanvas *c, const Model *m)
     int fav_on = m->gfav && !disfav;
     float x = 18;
     /* no B Exit face on any panel, so SELECT shows the same everywhere (B still leaves) */
-    px_face(c, x, y, PX_LEFT, "X", T("Party"), 0, &r, PX_FACE_PRIMARY);
-    add_face_hit(r, HIT_LOBBY);
-    bw = px_face_w(c, "X", T("Party"));
+    px_face(c, x, y, PX_LEFT, "Y", T("Party"), 0, &r, PX_FACE_PRIMARY);
+    add_face_hit(r, HIT_Y);
+    bw = px_face_w(c, "Y", T("Party"));
     x += bw + 8;
     aw = px_face_w(c, "A", T("Play"));
     {
-        /* SELECT, DS Download Play, between Lobby and Favorite: the short label where the long one doesn't fit */
-        const float room = 622 - aw - 8 - px_face_w(c, "Y", T("Favorite")) - 8 - x;
+        /* SELECT, DS Download Play, between Party and Options: the short label where the long one doesn't fit */
+        const float room = 622 - aw - 8 - px_face_w(c, "X", T("Options")) - 8 - x;
         const char *dl = T("DS Download Play");
         if (px_face_w(c, "SELECT", dl) > room) dl = T("Download");
         if (px_face_w(c, "SELECT", dl) > room) dl = "";
@@ -583,8 +633,8 @@ static void library_bottom_faces(PxCanvas *c, const Model *m)
     }
     px_face(c, 622, y, PX_RIGHT, "A", T("Play"), m->ngames <= 0, &r, PX_FACE_NEUTRAL);
     add_face_hit(r, HIT_OK);
-    px_face(c, 622 - aw - 8, y, PX_RIGHT, "Y", T("Favorite"), disfav, &r, fav_on ? PX_FACE_FAV : PX_FACE_NEUTRAL);
-    add_face_hit(r, HIT_Y);
+    px_face(c, 622 - aw - 8, y, PX_RIGHT, "X", T("Options"), disfav, &r, fav_on ? PX_FACE_FAV : PX_FACE_NEUTRAL);
+    add_face_hit(r, HIT_LOBBY);
 }
 
 /* bottom: the library, as a grid scrolled sideways or as a list */
@@ -816,12 +866,51 @@ void view_bottom(PxCanvas *c, const Model *m)
         return;
     }
     if (m->view == V_GAMES) { games_bottom(c, m); return; }
-    if (m->view == V_FW_CONFIRM) {
+    if (m->view == V_GAME_OPTS) {
+        char name[GAME_PATH];
+        float y = 204;
         g_nhits = 0;
         px_screen(c);
-        dialog(c, T("Open the DS menu?"),
-               T("This starts your console's DS firmware. In the DS menu, choose DS Download Play to join the game another console is hosting."),
-               NULL);
+        px_rect_a(c, 0, 0, 640, 480, 0x000000, px.light ? 70 : 150);
+        px_card(c, 50, 96, 540, 120 + OPT_COUNT * 54, 0, 0);
+        px_text_fit(c, PX_MEDIUM, 26, 76, 118, T("Options"), px.ink, 0, 488, PX_LEFT);
+        name[0] = 0;
+        if (m->ngames > 0 && m->gsel >= 0 && m->gsel < m->ngames) view_game_name(m->games[m->gsel], name, (int)sizeof name);
+        px_text_fit(c, PX_REGULAR, 18, 76, 156, name, px.muted, 0, 488, PX_LEFT);
+        for (i = 0; i < OPT_COUNT; i++, y += 54) {
+            const char *lab = "";
+            if (i == OPT_FAVORITE) lab = m->gfav ? T("Remove favorite") : T("Add favorite");
+            px_card(c, 70, y, 500, 46, m->opt_cursor == i, 0);
+            px_text_fit(c, PX_MEDIUM, 20, 90, y + 12, lab, m->opt_cursor == i ? px.on_pick : px.ink, 0, 460, PX_LEFT);
+            add_hit(c, 70, y, 500, 46, HIT_ROW, i);
+        }
+        px_face(c, 18, 422, PX_LEFT, "B", T("Back"), 0, &r, PX_FACE_NEUTRAL);
+        add_face_hit(r, HIT_BACK);
+        px_face(c, 622, 422, PX_RIGHT, "A", T("Choose"), 0, &r, PX_FACE_PRIMARY);
+        add_face_hit(r, HIT_OK);
+        return;
+    }
+    if (m->view == V_FW_CONFIRM) {
+        char hints[DLPLAY_HINTS][320];
+        const int nh = view_dlplay_hints(m, hints, DLPLAY_HINTS);
+        float y;
+        g_nhits = 0;
+        px_screen(c);
+        px_rect_a(c, 0, 0, 640, 480, 0x000000, px.light ? 70 : 150);
+        {
+            const float h = nh ? (float)(190 + 80 * nh > 380 ? 380 : 190 + 80 * nh) : 200;
+            const float top = nh ? 24 + (380 - h) / 2 : 120;
+            px_card(c, 34, top, 572, h, 0, 0);
+            y = top + 22;
+        }
+        y += 32 * px_text_wrap(c, PX_MEDIUM, 26, 58, y, T("Open the DS menu?"), px.ink, 524, 2, 32) + 8;
+        y += 23 * px_text_wrap(c, PX_REGULAR, 17, 58, y,
+                               T("This starts your console's DS firmware. In the DS menu, choose DS Download Play to join the game another console is hosting."),
+                               px.muted, 524, 3, 23) + 10;
+        for (i = 0; i < nh && y < 390; i++) {
+            px_rect(c, 58, y + 8, 6, 6, px.light ? 0xc4841a : 0xe0a030);
+            y += 22 * px_text_wrap(c, PX_REGULAR, 16, 74, y, hints[i], px.ink, 508, 3, 22) + 8;
+        }
         px_face(c, 18, 422, PX_LEFT, "B", T("Cancel"), 0, &r, PX_FACE_NEUTRAL);
         add_face_hit(r, HIT_BACK);
         if (view_firmware_copy()) {  /* the DS menu's settings kept on this console: X puts the user's own back */
