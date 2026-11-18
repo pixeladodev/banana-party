@@ -38,6 +38,6 @@ Español
 -------
 
 1. En la consola: Settings > Network > File sharing > On.
-2. En el ordenador, abre el recurso **banana**. Copia solo dentro de **store**.
+2. En la computadora, abre el recurso **banana**. Copia solo dentro de **store**.
 3. Usa la opción A o la B.
 4. Reinicia una vez. Abre **Apps**.
