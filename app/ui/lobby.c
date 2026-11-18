@@ -59,7 +59,7 @@ static void face_b(PxCanvas *c, const char *label, int library, int variant)
 static void face_leave_room(PxCanvas *c)
 {
     PxRect r;
-    px_face(c, 622, LIB_FACE_Y, PX_RIGHT, "X", T("Leave room"), 0, &r, PX_FACE_DANGER);
+    px_face(c, 622, LIB_FACE_Y, PX_RIGHT, "X", T("Leave Party"), 0, &r, PX_FACE_DANGER);
     add_face_hit(r, HIT_LOBBY_DISCONNECT);
 }
 
@@ -102,7 +102,7 @@ float lobby_library_status(PxCanvas *c, const Model *m, float y)
     const Lobby *lb = &m->lobby;
     float x = 42;
     int i;
-    px_label(c, x, y, T("Lobby"), px.muted);
+    px_label(c, x, y, T("Party"), px.muted);
     if (!lb->in_lobby) {
         const char *phrase = T("Auto discovery");
         const char *state = m->discover ? T("On") : T("Off");
@@ -355,16 +355,16 @@ void lobby_top(PxCanvas *c, const Model *m)
     px_sheet(c, 18, 60, 604, 406);
     switch (lb->phase) {
     case LP_CHOOSE:
-        px_label(c, 44, 84, T("Lobby"), px.ink);
-        px_text_wrap(c, PX_MEDIUM, 22, 42, 108, T("Host a room for friends\nor join one on your network."), px.ink, 556, 2, 28);
+        px_label(c, 44, 84, T("Party"), px.ink);
+        px_text_wrap(c, PX_MEDIUM, 22, 42, 108, T("Host a Party for friends\nor join one on your network."), px.ink, 556, 2, 28);
         if (lb->cursor == 0) host_offer(c, 176);
         else link_pair(c, 176, 1, T("You"), 1, T("Host"), 1, 0, 0);
         px_text_wrap(c, PX_REGULAR, 18, 42, 360, T("Pick Host or Join on the bottom screen."), px.muted, 556, 2, 24);
         break;
     case LP_HOST_SLOTS: {
         float below;
-        px_label(c, 44, 84, T("Lobby"), px.ink);
-        px_text_fit(c, PX_MEDIUM, 22, 42, 108, T("How many can be in this lobby?"), px.ink, 0, 556, PX_LEFT);
+        px_label(c, 44, 84, T("Party"), px.ink);
+        px_text_fit(c, PX_MEDIUM, 22, 42, 108, T("How many can be in this Party?"), px.ink, 0, 556, PX_LEFT);
         below = seat_row(c, art_room, slots_pick(lb->cursor), 1, NULL, 0);
         snprintf(buf, sizeof buf, T("Up to %d consoles, including this one."), slots_pick(lb->cursor));
         px_text_wrap(c, PX_REGULAR, 18, 42, below, buf, px.muted, 556, 2, 24);
@@ -374,8 +374,8 @@ void lobby_top(PxCanvas *c, const Model *m)
         int total = lb->max_slots > 0 ? lb->max_slots : 2;
         int filled = lb->nmembers > 0 ? lb->nmembers : 1;
         float below;
-        px_label(c, 44, 84, T("Your room"), px.muted);
-        px_text_fit(c, PX_MEDIUM, 26, 42, 108, lb->room[0] ? lb->room : T("Your room"), px.ink, 0, 460, PX_LEFT);
+        px_label(c, 44, 84, T("Your Party"), px.muted);
+        px_text_fit(c, PX_MEDIUM, 26, 42, 108, lb->room[0] ? lb->room : T("Your Party"), px.ink, 0, 460, PX_LEFT);
         seat_count(c, filled, total, 108);
         below = seat_row(c, art_room, total, filled, lb, 1);
         if (lb->nmembers <= 1)
@@ -385,14 +385,14 @@ void lobby_top(PxCanvas *c, const Model *m)
     }
     case LP_JOIN_SEARCH:
         px_label(c, 44, 84, T("On your network"), px.muted);
-        px_text_dots(c, PX_MEDIUM, 22, 42, 108, T("Searching for room"), m->dots, px.ink, 0, PX_LEFT);
+        px_text_dots(c, PX_MEDIUM, 22, 42, 108, T("Searching for a Party"), m->dots, px.ink, 0, PX_LEFT);
         searching(c, art);
         px_text_wrap(c, PX_REGULAR, 18, 42, 312, T("Looking on your local network."), px.muted, 556, 2, 24);
         lobby_latency_warn(c, m);
         break;
     case LP_JOIN_PICK:
         px_label(c, 44, 84, T("On your network"), px.muted);
-        px_text_fit(c, PX_MEDIUM, 26, 42, 108, T("Rooms"), px.ink, 0, 540, PX_LEFT);
+        px_text_fit(c, PX_MEDIUM, 26, 42, 108, T("Parties"), px.ink, 0, 540, PX_LEFT);
         if (lb->nhosts <= 0) {
             alone(c, art);
             px_text_wrap(c, PX_REGULAR, 18, 42, 312, T("No hosts found."), px.muted, 556, 2, 24);
@@ -402,15 +402,15 @@ void lobby_top(PxCanvas *c, const Model *m)
             if (sel < 0 || sel >= lb->nhosts) sel = 0;
             name = lb->hosts_name[sel][0] ? lb->hosts_name[sel] : lb->hosts_addr[sel];
             link_pair(c, art, 1, T("You"), 1, name, 1, lb->hosts_players[sel], lb->hosts_max[sel]);
-            px_text_wrap(c, PX_REGULAR, 18, 42, 328, T("Pick a room. Each person opens their own game."), px.muted, 556, 2, 24);
+            px_text_wrap(c, PX_REGULAR, 18, 42, 328, T("Pick a Party. Each person opens their own game."), px.muted, 556, 2, 24);
         }
         lobby_latency_warn(c, m);
         break;
     case LP_GUEST_WAIT: {
         int total = lb->max_slots > 0 ? lb->max_slots : 2;
         int filled = lb->nmembers > 0 ? lb->nmembers : 1;
-        px_label(c, 44, 84, T("In the lobby"), px.muted);
-        px_text_fit(c, PX_MEDIUM, 26, 42, 108, lb->room[0] ? lb->room : T("In the lobby"), px.ink, 0, 460, PX_LEFT);
+        px_label(c, 44, 84, T("In the Party"), px.muted);
+        px_text_fit(c, PX_MEDIUM, 26, 42, 108, lb->room[0] ? lb->room : T("In the Party"), px.ink, 0, 460, PX_LEFT);
         seat_count(c, filled, total, 108);
         seat_row(c, art_room, total, filled, lb, 1);
         break;
@@ -514,12 +514,12 @@ static void lobby_member_list(PxCanvas *c, const Model *m, float y)
 void lobby_bottom(PxCanvas *c, const Model *m)
 {
     PxRect r;
-    const char *title = T("Lobby");
+    const char *title = T("Party");
     g_nhits = 0;
     px_screen(c);
-    if (m->lobby.phase == LP_JOIN_PICK) title = T("Rooms");
-    else if (m->lobby.phase == LP_HOST_WAIT) title = T("Your room");
-    else if (m->lobby.phase == LP_GUEST_WAIT) title = T("In the lobby");
+    if (m->lobby.phase == LP_JOIN_PICK) title = T("Parties");
+    else if (m->lobby.phase == LP_HOST_WAIT) title = T("Your Party");
+    else if (m->lobby.phase == LP_GUEST_WAIT) title = T("In the Party");
     px_bubble(c, 18, 14, 604, 54, 0);
     px_text_fit(c, PX_MEDIUM, 26, 38, 25, title, px.ink, 0, 440, PX_LEFT);
     switch (m->lobby.phase) {
@@ -542,7 +542,7 @@ void lobby_bottom(PxCanvas *c, const Model *m)
         break;
     case LP_JOIN_SEARCH:
         px_card(c, 18, 120, 604, 120, 0, 0);
-        px_text_dots(c, PX_MEDIUM, 22, 40, 158, T("Searching for room"), m->dots, px.ink, 0, PX_LEFT);
+        px_text_dots(c, PX_MEDIUM, 22, 40, 158, T("Searching for a Party"), m->dots, px.ink, 0, PX_LEFT);
         face_b(c, T("Cancel"), 0, PX_FACE_NEUTRAL);
         break;
     case LP_JOIN_PICK:

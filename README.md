@@ -12,9 +12,9 @@
 
 ## Screens
 
-You open Banana Party and the room is the first decision. This console can host, or it can join a room that is already on the same Wi-Fi. Light and dark are the same night, just two moods.
+You open Banana Party and the first decision is the Party. This console can host one, or it can join a Party that is already on the same Wi-Fi. Light and dark are the same night, just two moods.
 
-A host sets the seats, and the room is open. Friends on the network can see it. A guest looks, picks a room, and lands inside with everyone else. The library is right there: covers when you want the shelf, a list when you want the titles lined up. English or Spanish. The room stays with you while you choose what to play.
+A host sets the seats, and the Party is open. Friends on the network can see it. A guest looks, picks a Party, and lands inside with everyone else. The library is right there: covers when you want the shelf, a list when you want the titles lined up. English or Spanish. The Party stays with you while you choose what to play.
 
 <table>
   <tr>
@@ -27,21 +27,21 @@ A host sets the seats, and the room is open. Friends on the network can see it. 
       <sub><b>Set the seats</b></sub>
     </td>
     <td align="center" width="25%">
-      <img src="docs/images/banana-party-readme-host-room-640x480-dark.png" alt="Host room, dark"><br>
-      <sub><b>The room is open</b></sub>
+      <img src="docs/images/banana-party-readme-host-room-640x480-dark.png" alt="Hosting a Party, dark"><br>
+      <sub><b>The Party is open</b></sub>
     </td>
     <td align="center" width="25%">
-      <img src="docs/images/banana-party-readme-join-search-640x480-light.png" alt="Searching for a room, light"><br>
+      <img src="docs/images/banana-party-readme-join-search-640x480-light.png" alt="Searching for a Party, light"><br>
       <sub><b>Looking nearby</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="25%">
-      <img src="docs/images/banana-party-readme-guest-rooms-640x480-dark.png" alt="Rooms on the network, dark"><br>
-      <sub><b>Rooms on the Wi-Fi</b></sub>
+      <img src="docs/images/banana-party-readme-guest-rooms-640x480-dark.png" alt="Parties on the network, dark"><br>
+      <sub><b>Parties on the Wi-Fi</b></sub>
     </td>
     <td align="center" width="25%">
-      <img src="docs/images/banana-party-readme-guest-joined-640x480-light.png" alt="Joined a room, light"><br>
+      <img src="docs/images/banana-party-readme-guest-joined-640x480-light.png" alt="Joined a Party, light"><br>
       <sub><b>You're in</b></sub>
     </td>
     <td align="center" width="25%">

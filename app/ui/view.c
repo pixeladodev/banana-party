@@ -126,7 +126,7 @@ const PxTr view_tr[] = {
       "Los juegos que abras aquí buscan otras consolas en tu Wi-Fi al empezar. También puedes cambiarlo en el menú del juego." },
     { "Games you open here start with local multiplayer off. Turn it on in the game's menu when you need it.",
       "Los juegos que abras aquí empiezan sin multijugador local. Actívalo en el menú del juego cuando lo necesites." },
-    { "Lobby", "Sala" },
+    { "Party", "Party" },
     { "Host", "Anfitrión" },
     { "You", "Tú" },
     { "(you)", "(tú)" },
@@ -134,34 +134,33 @@ const PxTr view_tr[] = {
     { "Guests", "Invitados" },
     { "Join", "Unirse" },
     { "Library", "Biblioteca" },
-    { "Not in a lobby", "Sin sala" },
+    { "Not in a Party", "Sin Party" },
     { "Hosting", "Anfitrión" },
-    { "Joined as guest", "Invitado en sala" },
-    { "Host a room for friends\nor join one on your network.",
-      "Abre una sala para tus amigos\no únete a una en tu red." },
+    { "Joined as guest", "Invitado en la Party" },
+    { "Host a Party for friends\nor join one on your network.",
+      "Abre una Party para tus amigos\no únete a una en tu red." },
     { "Pick Host or Join on the bottom screen.", "Elige Anfitrión o Unirse en la pantalla inferior." },
-    { "How many can be in this lobby?", "¿Cuántos pueden estar en esta sala?" },
+    { "How many can be in this Party?", "¿Cuántos pueden estar en esta Party?" },
     { "Up to %d consoles, including this one.", "Hasta %d consolas, incluida esta." },
     { "Choose 2, 3, or 4. Then wait for guests on the next screen.",
       "Elige 2, 3 o 4. Luego espera invitados en la siguiente pantalla." },
-    { "Room created", "Sala creada" },
+    { "Party created", "Party creada" },
     { "Waiting for guests", "Esperando invitados" },
     { "Guests appear here when they connect on the network.",
       "Los invitados aparecen aquí cuando se conectan en la red." },
     { "Join", "Unirse" },
-    { "Room", "Sala" },
     { "Members", "Miembros" },
-    { "Guests appear in the list when they connect. The room service is not wired yet, so the list stays honest.",
-      "Los invitados aparecen en la lista al conectarse. El servicio de sala aún no está conectado; la lista no inventa jugadores." },
+    { "Guests appear in the list when they connect. The Party service is not wired yet, so the list stays honest.",
+      "Los invitados aparecen en la lista al conectarse. El servicio de la Party aún no está conectado; la lista no inventa jugadores." },
     { "Searching", "Buscando" },
     { "Waiting", "Esperando" },
     { "Searching for hosts", "Buscando anfitriones" },
     { "Looking on your local network.", "Buscando en tu red local." },
     { "Hosts nearby", "Anfitriones cercanos" },
     { "No hosts found.", "No se encontró ningún anfitrión." },
-    { "Check Wi-Fi or Direct Link, or ask a friend to host. Joining needs the emulator room API.",
-      "Revisa Wi-Fi o Direct Link, o pide a un amigo que abra sala. Unirse requiere la API de sala del emulador." },
-    { "In the lobby", "En la sala" },
+    { "Check Wi-Fi or Direct Link, or ask a friend to host a Party.",
+      "Revisa Wi-Fi o Direct Link, o pide a un amigo que abra una Party." },
+    { "In the Party", "En la Party" },
     { "Waiting for the host to start.", "Esperando a que el anfitrión empiece." },
     { "Find a host on your network.", "Busca un anfitrión en tu red." },
     { "Let friends join this console.", "Deja que otros se unan a esta consola." },
@@ -169,11 +168,11 @@ const PxTr view_tr[] = {
     { "%d players", "%d jugadores" },
     { "Choose", "Elegir" },
     { "Leave", "Salir" },
-    { "Leave room", "Salir de la sala" },
+    { "Leave Party", "Salir de la Party" },
     { "Back", "Atrás" },
     { "Cancel", "Cancelar" },
     { "No guests yet", "Aún no hay invitados" },
-    { "Searching for room", "Buscando sala" },
+    { "Searching for a Party", "Buscando una Party" },
     { "Game host", "Anfitrión del juego" },
     { "Idle", "En espera" },
     { "#", "#" },
@@ -183,27 +182,27 @@ const PxTr view_tr[] = {
     { "IP", "IP" },
     { "LAN needs low latency on your network. It will not work well through a VPN or any tunnel.",
       "El modo LAN necesita poca latencia en tu red. No funcionará bien con VPN ni túneles." },
-    { "Leave the lobby?", "¿Salir de la sala?" },
-    { "This ends your lobby session for everyone.", "Cierra la sala para todos." },
+    { "Leave the Party?", "¿Salir de la Party?" },
+    { "This ends the Party for everyone.", "Cierra la Party para todos." },
     { "Leave the app?", "¿Salir de la app?" },
-    { "The room will close.", "Se cerrará la sala." },
+    { "The Party will close.", "Se cerrará la Party." },
     { "Stay", "Quedarme" },
     { "Exit app", "Salir" },
     { "Waiting for a guest…", "Esperando un invitado…" },
     { "Searching…", "Buscando…" },
     { "No hosts found", "Sin anfitriones" },
-    { "Rooms", "Salas" },
+    { "Parties", "Parties" },
     { "On your network", "En tu red" },
-    { "Your room", "Tu sala" },
+    { "Your Party", "Tu Party" },
     { "Connected", "Conectado" },
     { "%d of %d", "%d de %d" },
     { "Name", "Nombre" },
     { "You are the only one so far. Others see this name on the network.",
       "Solo tú, por ahora. Los demás ven este nombre en la red." },
-    { "Pick a room. Each person opens their own game.",
-      "Elige una sala. Cada quien abre su juego." },
-    { "You leave this room. The host's room stays open.",
-      "Sales tú. La sala del anfitrión sigue." },
+    { "Pick a Party. Each person opens their own game.",
+      "Elige una Party. Cada quien abre su juego." },
+    { "You leave this Party. The host's Party stays open.",
+      "Sales tú. La Party del anfitrión sigue." },
     { NULL, NULL }
 };
 
@@ -568,9 +567,9 @@ static void library_bottom_faces(PxCanvas *c, const Model *m)
     int fav_on = m->gfav && !disfav;
     float x = 18;
     /* no B Exit face on any panel, so SELECT shows the same everywhere (B still leaves) */
-    px_face(c, x, y, PX_LEFT, "X", T("Lobby"), 0, &r, PX_FACE_PRIMARY);
+    px_face(c, x, y, PX_LEFT, "X", T("Party"), 0, &r, PX_FACE_PRIMARY);
     add_face_hit(r, HIT_LOBBY);
-    bw = px_face_w(c, "X", T("Lobby"));
+    bw = px_face_w(c, "X", T("Party"));
     x += bw + 8;
     aw = px_face_w(c, "A", T("Play"));
     {
@@ -747,7 +746,7 @@ static float dialog_exit_app(PxCanvas *c)
     px_card(c, 40, 88, 560, 272, 0, 0);
     px_text_wrap(c, PX_MEDIUM, 24, 64, 108, T("Leave the app?"), px.ink, 512, 2, 30);
     y = 158;
-    y += 24 * px_text_wrap(c, PX_REGULAR, 17, 64, y, T("The room will close."), px.muted, 512, 2, 24);
+    y += 24 * px_text_wrap(c, PX_REGULAR, 17, 64, y, T("The Party will close."), px.muted, 512, 2, 24);
     return y;
 }
 
@@ -806,13 +805,13 @@ void view_bottom(PxCanvas *c, const Model *m)
     if (m->view == V_LOBBY_DISCONNECT) {
         g_nhits = 0;
         px_screen(c);
-        dialog(c, T("Leave the lobby?"),
-               m->lobby.role == 0 ? T("This ends your lobby session for everyone.")
-                                  : T("You leave this room. The host's room stays open."),
+        dialog(c, T("Leave the Party?"),
+               m->lobby.role == 0 ? T("This ends the Party for everyone.")
+                                  : T("You leave this Party. The host's Party stays open."),
                NULL);
         px_face(c, 18, 422, PX_LEFT, "B", T("Stay"), 0, &r, PX_FACE_NEUTRAL);
         add_face_hit(r, HIT_BACK);
-        px_face(c, 622, 422, PX_RIGHT, "A", T("Leave room"), 0, &r, PX_FACE_DANGER);
+        px_face(c, 622, 422, PX_RIGHT, "A", T("Leave Party"), 0, &r, PX_FACE_DANGER);
         add_face_hit(r, HIT_OK);
         return;
     }

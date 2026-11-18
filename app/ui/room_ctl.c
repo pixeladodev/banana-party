@@ -259,7 +259,7 @@ void room_sync_lobby(const RoomSnap *rs, Lobby *lb, const struct Model *m)
                 const char *who = lb->members[0];
                 for (i = 0; i < lb->nmembers; i++)
                     if (lb->roles[i] == 0) { who = lb->members[i]; break; }
-                snprintf(lb->room, LOBBY_NAME, "%s's game", who);
+                snprintf(lb->room, LOBBY_NAME, "%s's Party", who);
             }
             lb->nhosts = 0;
             for (i = 0; i < rs->nhosts && lb->nhosts < LOBBY_MEMBERS; i++) {

@@ -421,7 +421,7 @@ int main(int argc, char **argv)
         m.lobby.phase = LP_JOIN_PICK;
         m.lobby.nhosts = 1;
         m.lobby.join_sel = 0;
-        snprintf(m.lobby.hosts_name[0], sizeof m.lobby.hosts_name[0], "Macos's game");
+        snprintf(m.lobby.hosts_name[0], sizeof m.lobby.hosts_name[0], "Macos's Party");
         snprintf(m.lobby.hosts_addr[0], sizeof m.lobby.hosts_addr[0], "192.168.18.185");
         m.lobby.hosts_players[0] = 1;
         m.lobby.hosts_max[0] = 4;
@@ -431,7 +431,7 @@ int main(int argc, char **argv)
         m.lobby.phase = LP_HOST_WAIT;
         m.lobby.max_slots = 3;
         m.lobby.nmembers = 1;
-        snprintf(m.lobby.room, sizeof m.lobby.room, "Carlos's game");
+        snprintf(m.lobby.room, sizeof m.lobby.room, "Carlos's Party");
         snprintf(m.lobby.members[0], sizeof m.lobby.members[0], "Carlos");
         m.lobby.roles[0] = 0;
         m.lobby.member_ping[0] = -1;
@@ -446,7 +446,7 @@ int main(int argc, char **argv)
         m.lobby.role = 1;
         m.lobby.phase = LP_GUEST_WAIT;
         m.lobby.nmembers = 2;
-        snprintf(m.lobby.room, sizeof m.lobby.room, "Macos's game");
+        snprintf(m.lobby.room, sizeof m.lobby.room, "Macos's Party");
         snprintf(m.lobby.members[0], sizeof m.lobby.members[0], "Macos");
         m.lobby.roles[0] = 0;
         m.lobby.member_ping[0] = -1;
