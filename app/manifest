@@ -1,8 +1,8 @@
-app_version=0.1.1
+app_version=0.2.0
 bananaos=0.5.3.4
-binary_sha=893f6f74ca5aa68ead6fc948a09bcebf3070ada615bf929cad6b5b922f1c64cf
+binary_sha=f28bb559a3c5f29cef3b752ac4eaaaf4d0f273b4150ffebfc00122540c311517
 emulator_package=bananads-lan
-emulator_version=0.1.1
+emulator_version=0.1.2
 lobby_rom_source=b80e24119969ababf9bf8d60e090fc683735e92a
 lobby_rom_sha=faeef259c5e5b59c1f63b7a8d11ff5d42ac036ae5eb57b01bde7370a2b72cea2
 update_repo=pixeladodev/banana-party
