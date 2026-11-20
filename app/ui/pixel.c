@@ -1413,8 +1413,8 @@ void px_face(PxCanvas *c, float x, float y, int align, const char *key, const ch
         }
         b.fill = fill; b.border = border; b.band_top = band;
         primary = 1;
-    } else if (!dis && (variant == PX_FACE_DANGER || variant == PX_FACE_FAV)) {
-        /* danger is the alert red Favorite already uses: text, border and fill, three tones */
+    } else if (!dis && variant == PX_FACE_DANGER) {
+        /* danger is the alert red: text, border and fill, three tones */
         b.fill = px.fav_body;
         b.border = px.fav_border;
         b.band_top = px.fav_band;

@@ -162,9 +162,9 @@ float px_keycap(PxCanvas *c, float x, float y, const char *key);
 float px_keycap_w(const PxCanvas *c, const char *key);
 /* a face button: a key cap and its label, 40 high; align PX_LEFT/RIGHT/CENTER around x; dis greys it.
    Its area in pixels goes to *hit (may be NULL).
-   neutral: the usual legend. primary: the theme accent, three tones (text, border, fill), as Favorite is.
-   danger: the alert red, the same three tones (Exit, disconnect). fav: Favorite, its own three tones. */
-enum { PX_FACE_NEUTRAL = 0, PX_FACE_PRIMARY = 1, PX_FACE_DANGER = 2, PX_FACE_FAV = 3 };
+   neutral: the usual legend. primary: the theme accent, three tones (text, border, fill), as the Party button is.
+   danger: the alert red, the same three tones (Exit, disconnect). */
+enum { PX_FACE_NEUTRAL = 0, PX_FACE_PRIMARY = 1, PX_FACE_DANGER = 2 };
 void px_face(PxCanvas *c, float x, float y, int align, const char *key, const char *label, int dis, PxRect *hit,
               int variant);
 void px_fav_mark(PxCanvas *c, float x, float y, float s);

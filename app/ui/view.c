@@ -614,7 +614,6 @@ static void library_bottom_faces(PxCanvas *c, const Model *m)
     PxRect r;
     float y = LIB_FACE_Y, bw, aw;
     int disfav = m->ngames <= 0;
-    int fav_on = m->gfav && !disfav;
     float x = 18;
     /* no B Exit face on any panel, so SELECT shows the same everywhere (B still leaves) */
     px_face(c, x, y, PX_LEFT, "Y", T("Party"), 0, &r, PX_FACE_PRIMARY);
@@ -633,7 +632,9 @@ static void library_bottom_faces(PxCanvas *c, const Model *m)
     }
     px_face(c, 622, y, PX_RIGHT, "A", T("Play"), m->ngames <= 0, &r, PX_FACE_NEUTRAL);
     add_face_hit(r, HIT_OK);
-    px_face(c, 622 - aw - 8, y, PX_RIGHT, "X", T("Options"), disfav, &r, fav_on ? PX_FACE_FAV : PX_FACE_NEUTRAL);
+    /* the options of the picked game: always neutral. The favorite moved into this menu, and the
+       favorite's red belongs to the tile's star and to the menu's row, not to this button */
+    px_face(c, 622 - aw - 8, y, PX_RIGHT, "X", T("Options"), disfav, &r, PX_FACE_NEUTRAL);
     add_face_hit(r, HIT_LOBBY);
 }
 
