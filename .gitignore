@@ -1,10 +1,22 @@
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# build
 dist/
 app/emu/bananads
 app/emu/lobby.nds
-__pycache__/
 app/bin/
 app/ui/banana-party
 app/.mounted
+
+# Python
+__pycache__/
+*.py[cod]
+
+# this machine only
 dev/consoles.local
 preview.env
 preview-library.list
